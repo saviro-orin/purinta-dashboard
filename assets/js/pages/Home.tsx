@@ -52,12 +52,8 @@ function StatusPill({ status }: { status: string }) {
   const label = live ? 'Live updates connected' : waiting ? 'Connecting live updates' : 'Live updates disconnected';
 
   return (
-    <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/15 bg-slate-950/70 px-3 py-1.5 text-xs font-medium text-cyan-50">
-      <span
-        className={`h-2 w-2 rounded-full ${
-          live ? 'bg-emerald-300 shadow-[0_0_16px_rgba(110,231,183,0.85)]' : 'bg-amber-300'
-        }`}
-      />
+    <div className="inline-flex items-center gap-2 rounded-full border border-[#C8E4B0] bg-[#E7F4EC] px-3 py-1.5 text-xs font-semibold text-[#185229] shadow-[0_4px_0_#C8E4B0]">
+      <span className={`h-2.5 w-2.5 rounded-full ${live ? 'bg-[#39763D]' : 'bg-[#FFA466]'}`} />
       {label}
     </div>
   );
@@ -68,44 +64,44 @@ function StatCard({
   value,
   detail,
   icon: Icon,
-  tone = 'cyan',
+  tone = 'green',
 }: {
   label: string;
   value: string;
   detail: string;
   icon: LucideIcon;
-  tone?: 'cyan' | 'emerald' | 'blue';
+  tone?: 'green' | 'blush' | 'blue';
 }) {
-  const iconTone = {
-    cyan: 'bg-cyan-300/10 text-cyan-100 border-cyan-300/15',
-    emerald: 'bg-emerald-300/10 text-emerald-100 border-emerald-300/15',
-    blue: 'bg-blue-300/10 text-blue-100 border-blue-300/15',
+  const toneClass = {
+    green: 'bg-[#E7F4EC] text-[#185229] border-[#C8E4B0]',
+    blush: 'bg-[#FFF5F4] text-[#8C1C5F] border-[#FEDBD8]',
+    blue: 'bg-[#EDF4FF] text-[#3E73C4] border-[#B2D0FF]',
   }[tone];
 
   return (
-    <section className="rounded-3xl border border-white/10 bg-white/[0.055] p-5 shadow-2xl shadow-cyan-950/30 backdrop-blur">
+    <section className="rounded-[28px] border border-[#F0EDD4] bg-white/85 p-5 shadow-[0_7px_0_#F0EDD4,0_18px_40px_rgba(57,118,61,0.08)] backdrop-blur">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-medium text-slate-300">{label}</p>
-          <p className="mt-3 text-3xl font-semibold tracking-tight text-white">{value}</p>
+          <p className="text-sm font-semibold text-[#666666]">{label}</p>
+          <p className="mt-3 text-3xl font-black tracking-tight text-[#185229]">{value}</p>
         </div>
-        <div className={`rounded-2xl border p-2 ${iconTone}`}>
+        <div className={`rounded-2xl border p-2 ${toneClass}`}>
           <Icon className="h-5 w-5" aria-hidden />
         </div>
       </div>
-      <p className="mt-3 text-sm leading-6 text-slate-400">{detail}</p>
+      <p className="mt-3 text-sm leading-6 text-[#666666]">{detail}</p>
     </section>
   );
 }
 
 function Explainer({ title, children }: { title: string; children: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-4">
-      <div className="flex items-center gap-2 text-sm font-semibold text-white">
-        <CircleHelp className="h-4 w-4 text-cyan-200" />
+    <div className="rounded-2xl border border-[#F0EDD4] bg-[#FDFBF1] p-4 shadow-[0_4px_0_#F0EDD4]">
+      <div className="flex items-center gap-2 text-sm font-black text-[#185229]">
+        <CircleHelp className="h-4 w-4 text-[#39763D]" />
         {title}
       </div>
-      <p className="mt-2 text-sm leading-6 text-slate-400">{children}</p>
+      <p className="mt-2 text-sm leading-6 text-[#666666]">{children}</p>
     </div>
   );
 }
@@ -114,62 +110,70 @@ function MarketCard({ market }: { market: PurintaSnapshot['markets'][number] }) 
   const utilization = Math.min(100, Math.max(0, numberValue(market.utilization)));
   const borrow = numberValue(market.borrow_usdc);
   const supply = numberValue(market.supply_usdc);
+  const mascotTone = market.collateral_symbol.toUpperCase().includes('PEPE') ? 'bg-[#E7F4EC]' : 'bg-[#FFF5F4]';
 
   return (
-    <article className="rounded-[2rem] border border-blue-200/10 bg-slate-950/75 p-5 shadow-xl shadow-black/30 sm:p-6">
+    <article className="rounded-[32px] border border-[#E5E1BE] bg-[#FCFBF5]/95 p-5 shadow-[0_8px_0_#D6D2B2,0_22px_50px_rgba(51,51,51,0.08)] sm:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-200/70">Market</p>
-          <h2 className="mt-2 text-2xl font-semibold text-white">{market.name}</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-400">
-            Borrow USDC using {market.collateral_symbol} collateral. LLTV is the maximum loan-to-value before the
-            position becomes risky.
-          </p>
+        <div className="flex gap-4">
+          <div
+            className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl border border-[#C8E4B0] ${mascotTone} text-xl font-black text-[#185229] shadow-[0_4px_0_#C8E4B0]`}
+          >
+            {market.collateral_symbol.slice(0, 1)}
+          </div>
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-[#39763D]">Meme collateral market</p>
+            <h2 className="mt-2 text-2xl font-black text-[#185229]">{market.name}</h2>
+            <p className="mt-2 text-sm leading-6 text-[#666666]">
+              Borrow USDC using {market.collateral_symbol} collateral. LLTV is the maximum loan-to-value before the
+              position becomes risky.
+            </p>
+          </div>
         </div>
-        <div className="w-fit rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs font-medium text-cyan-100">
+        <div className="w-fit rounded-full border border-[#FEDBD8] bg-[#FFF5F4] px-3 py-1 text-xs font-black text-[#8C1C5F] shadow-[0_3px_0_#FEDBD8]">
           LLTV {pct(market.lltv)}
         </div>
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-3 text-sm lg:grid-cols-4">
-        <div className="rounded-2xl bg-white/[0.045] p-4">
-          <p className="text-slate-500">Borrowed now</p>
-          <p className="mt-1 text-lg font-semibold text-white">${money(borrow, 2)}</p>
+        <div className="rounded-2xl border border-[#F0EDD4] bg-white p-4">
+          <p className="font-semibold text-[#666666]">Borrowed now</p>
+          <p className="mt-1 text-lg font-black text-[#185229]">${money(borrow, 2)}</p>
         </div>
-        <div className="rounded-2xl bg-white/[0.045] p-4">
-          <p className="text-slate-500">Supplied liquidity</p>
-          <p className="mt-1 text-lg font-semibold text-white">${money(supply, 2)}</p>
+        <div className="rounded-2xl border border-[#F0EDD4] bg-white p-4">
+          <p className="font-semibold text-[#666666]">Supplied liquidity</p>
+          <p className="mt-1 text-lg font-black text-[#185229]">${money(supply, 2)}</p>
         </div>
-        <div className="rounded-2xl bg-white/[0.045] p-4">
-          <p className="text-slate-500">Borrow APY</p>
-          <p className="mt-1 text-lg font-semibold text-emerald-200">{pct(market.borrow_apy)}</p>
+        <div className="rounded-2xl border border-[#F0EDD4] bg-white p-4">
+          <p className="font-semibold text-[#666666]">Borrow APY</p>
+          <p className="mt-1 text-lg font-black text-[#39763D]">{pct(market.borrow_apy)}</p>
         </div>
-        <div className="rounded-2xl bg-white/[0.045] p-4">
-          <p className="text-slate-500">Net supply APY</p>
-          <p className="mt-1 text-lg font-semibold text-cyan-100">{pct(market.net_supply_apy)}</p>
+        <div className="rounded-2xl border border-[#F0EDD4] bg-white p-4">
+          <p className="font-semibold text-[#666666]">Net supply APY</p>
+          <p className="mt-1 text-lg font-black text-[#3E73C4]">{pct(market.net_supply_apy)}</p>
         </div>
       </div>
 
-      <div className="mt-6 rounded-2xl border border-white/10 bg-black/20 p-4">
+      <div className="mt-6 rounded-2xl border border-[#C8E4B0] bg-[#E7F4EC] p-4">
         <div className="flex items-center justify-between text-sm">
-          <span className="font-medium text-slate-300">Utilization</span>
-          <span className="font-semibold text-white">{pct(market.utilization)}</span>
+          <span className="font-black text-[#185229]">Utilization</span>
+          <span className="font-black text-[#185229]">{pct(market.utilization)}</span>
         </div>
-        <div className="mt-3 h-3 rounded-full bg-slate-800">
+        <div className="mt-3 h-3 rounded-full bg-[#C8E4B0]">
           <div
-            className="h-3 rounded-full bg-gradient-to-r from-cyan-300 to-blue-400"
+            className="h-3 rounded-full bg-gradient-to-r from-[#39763D] via-[#57A053] to-[#3E73C4]"
             style={{ width: `${utilization}%` }}
           />
         </div>
-        <p className="mt-3 text-xs leading-5 text-slate-500">
+        <p className="mt-3 text-xs leading-5 text-[#498746]">
           Utilization means how much of the supplied USDC is currently borrowed. Higher utilization usually means higher
           rates and less available liquidity.
         </p>
       </div>
 
-      <div className="mt-5 flex flex-col gap-2 text-sm text-slate-400 sm:flex-row sm:flex-wrap">
+      <div className="mt-5 flex flex-col gap-2 text-sm text-[#39763D] sm:flex-row sm:flex-wrap">
         <a
-          className="inline-flex items-center gap-1 rounded-full border border-white/10 px-3 py-1.5 hover:border-cyan-300/30 hover:text-cyan-100"
+          className="inline-flex items-center gap-1 rounded-full border border-[#C8E4B0] bg-white px-3 py-1.5 font-semibold shadow-[0_3px_0_#C8E4B0] hover:bg-[#E7F4EC]"
           href={`https://etherscan.io/token/${market.collateral_address}`}
           target="_blank"
           rel="noreferrer"
@@ -178,7 +182,7 @@ function MarketCard({ market }: { market: PurintaSnapshot['markets'][number] }) 
           <ArrowUpRight className="h-3 w-3" />
         </a>
         <a
-          className="inline-flex items-center gap-1 rounded-full border border-white/10 px-3 py-1.5 hover:border-cyan-300/30 hover:text-cyan-100"
+          className="inline-flex items-center gap-1 rounded-full border border-[#C8E4B0] bg-white px-3 py-1.5 font-semibold shadow-[0_3px_0_#C8E4B0] hover:bg-[#E7F4EC]"
           href={`https://app.morpho.org/market?id=${market.id}&network=mainnet`}
           target="_blank"
           rel="noreferrer"
@@ -208,31 +212,40 @@ export default function Home({ snapshot: initialSnapshot }: { snapshot: PurintaS
   return (
     <>
       <Head title="Purinta Dashboard" />
-      <main className="min-h-screen overflow-hidden bg-[#020817] text-slate-100">
-        <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.18),transparent_30%),radial-gradient(circle_at_80%_20%,rgba(59,130,246,0.20),transparent_28%),linear-gradient(180deg,#020817_0%,#061225_45%,#020817_100%)]" />
+      <main
+        className="min-h-screen overflow-hidden text-[#333333]"
+        style={{
+          background:
+            'radial-gradient(circle at 50% -10%, rgba(241,252,203,0.86), transparent 34%), radial-gradient(circle at 10% 20%, rgba(231,244,236,0.95), transparent 28%), radial-gradient(circle at 88% 8%, rgba(254,219,216,0.80), transparent 30%), #FCFBF5',
+        }}
+      >
+        <div className="pointer-events-none fixed inset-x-0 top-0 h-56 bg-gradient-to-b from-[#F1FCCB]/70 to-transparent" />
         <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-5 sm:gap-8 sm:px-6 sm:py-8 lg:px-8">
-          <header className="rounded-[2rem] border border-white/10 bg-white/[0.045] p-5 shadow-2xl shadow-blue-950/30 backdrop-blur sm:p-8">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <header className="rounded-[36px] border border-[#E5E1BE] bg-[#FCFBF5]/90 p-5 shadow-[0_10px_0_#D6D2B2,0_30px_70px_rgba(57,118,61,0.12)] backdrop-blur sm:p-8">
+            <div className="flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-3xl">
                 <div className="flex flex-wrap items-center gap-2">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1.5 text-xs font-medium text-cyan-100">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-[#C8E4B0] bg-[#E7F4EC] px-3 py-1.5 text-xs font-black text-[#185229] shadow-[0_4px_0_#C8E4B0]">
                     <RadioTower className="h-3.5 w-3.5" /> Purinta live market monitor
                   </div>
                   <StatusPill status={status} />
                 </div>
-                <h1 className="mt-5 text-4xl font-semibold tracking-tight text-white sm:text-6xl">
+                <p className="mt-6 text-sm font-black uppercase tracking-[0.28em] text-[#39763D]">
+                  Deposit memes, print USDC
+                </p>
+                <h1 className="mt-3 text-4xl font-black tracking-tight text-[#185229] sm:text-6xl">
                   How much USDC is borrowed against Purinta meme collateral?
                 </h1>
-                <p className="mt-4 text-base leading-7 text-slate-300 sm:text-lg">
+                <p className="mt-4 text-base leading-7 text-[#4C4C4C] sm:text-lg">
                   A simple view of Purinta's PEPE and SPX markets on Morpho. It shows current borrow demand, available
                   liquidity, APYs, and whether the live feed is connected.
                 </p>
               </div>
-              <div className="rounded-3xl border border-cyan-300/10 bg-slate-950/75 p-4 text-sm text-slate-300 lg:min-w-72">
-                <p className="text-slate-500">Last data refresh</p>
-                <p className="mt-1 font-medium text-white">{formatTime(snapshot.fetched_at)}</p>
-                <p className="mt-4 text-slate-500">Latest indexed block</p>
-                <p className="mt-1 font-medium text-white">{snapshot.block_number?.toLocaleString() ?? 'Syncing'}</p>
+              <div className="rounded-[28px] border border-[#FEDBD8] bg-[#FFF5F4] p-4 text-sm text-[#666666] shadow-[0_7px_0_#FEDBD8] lg:min-w-72">
+                <p className="font-semibold text-[#8C1C5F]">Last data refresh</p>
+                <p className="mt-1 font-black text-[#333333]">{formatTime(snapshot.fetched_at)}</p>
+                <p className="mt-4 font-semibold text-[#8C1C5F]">Latest indexed block</p>
+                <p className="mt-1 font-black text-[#333333]">{snapshot.block_number?.toLocaleString() ?? 'Syncing'}</p>
               </div>
             </div>
           </header>
@@ -243,13 +256,14 @@ export default function Home({ snapshot: initialSnapshot }: { snapshot: PurintaS
               value={`$${money(snapshot.total_borrow_usdc, 2)}`}
               detail="Total USDC borrowed from PEPE and SPX collateral markets."
               icon={Wallet}
-              tone="emerald"
+              tone="green"
             />
             <StatCard
               label="Supplied liquidity"
               value={`$${money(snapshot.total_supply_usdc, 2)}`}
               detail="USDC currently supplied to those two markets."
               icon={Coins}
+              tone="green"
             />
             <StatCard
               label="Available liquidity"
@@ -263,13 +277,14 @@ export default function Home({ snapshot: initialSnapshot }: { snapshot: PurintaS
               value={pct(snapshot.weighted_borrow_apy)}
               detail="Borrow-rate average weighted by market borrow size."
               icon={LineChart}
+              tone="blush"
             />
           </section>
 
           <section className="grid gap-4 lg:grid-cols-[1.25fr_0.75fr]">
             <div className="grid gap-4">
               {snapshot.markets.length === 0 ? (
-                <section className="rounded-3xl border border-white/10 bg-white/[0.045] p-6 text-slate-300">
+                <section className="rounded-[28px] border border-[#F0EDD4] bg-white/80 p-6 text-[#666666] shadow-[0_7px_0_#F0EDD4]">
                   Waiting for the first live market snapshot.
                 </section>
               ) : (
@@ -278,27 +293,27 @@ export default function Home({ snapshot: initialSnapshot }: { snapshot: PurintaS
             </div>
 
             <aside className="flex flex-col gap-4">
-              <section className="rounded-3xl border border-white/10 bg-white/[0.045] p-5">
-                <div className="flex items-center gap-3 text-cyan-100">
+              <section className="rounded-[28px] border border-[#F0EDD4] bg-white/85 p-5 shadow-[0_7px_0_#F0EDD4]">
+                <div className="flex items-center gap-3 text-[#185229]">
                   <ShieldCheck className="h-5 w-5" />
-                  <h2 className="text-lg font-semibold text-white">What to watch</h2>
+                  <h2 className="text-lg font-black">What to watch</h2>
                 </div>
                 <dl className="mt-5 space-y-4 text-sm">
-                  <div className="flex justify-between gap-3 border-b border-white/10 pb-3">
-                    <dt className="text-slate-400">Most borrowed market</dt>
-                    <dd className="font-medium text-white">{totals.highestBorrow?.name ?? 'Waiting'}</dd>
+                  <div className="flex justify-between gap-3 border-b border-[#F0EDD4] pb-3">
+                    <dt className="font-semibold text-[#666666]">Most borrowed market</dt>
+                    <dd className="font-black text-[#185229]">{totals.highestBorrow?.name ?? 'Waiting'}</dd>
                   </div>
-                  <div className="flex justify-between gap-3 border-b border-white/10 pb-3">
-                    <dt className="text-slate-400">Overall utilization</dt>
-                    <dd className="font-medium text-white">{pct(totals.utilization)}</dd>
+                  <div className="flex justify-between gap-3 border-b border-[#F0EDD4] pb-3">
+                    <dt className="font-semibold text-[#666666]">Overall utilization</dt>
+                    <dd className="font-black text-[#185229]">{pct(totals.utilization)}</dd>
                   </div>
-                  <div className="flex justify-between gap-3 border-b border-white/10 pb-3">
-                    <dt className="text-slate-400">Tracked markets</dt>
-                    <dd className="font-medium text-white">{snapshot.markets.length}</dd>
+                  <div className="flex justify-between gap-3 border-b border-[#F0EDD4] pb-3">
+                    <dt className="font-semibold text-[#666666]">Tracked markets</dt>
+                    <dd className="font-black text-[#185229]">{snapshot.markets.length}</dd>
                   </div>
                   <div className="flex justify-between gap-3">
-                    <dt className="text-slate-400">Data source</dt>
-                    <dd className="font-medium text-white">Morpho Blue</dd>
+                    <dt className="font-semibold text-[#666666]">Data source</dt>
+                    <dd className="font-black text-[#185229]">Morpho Blue</dd>
                   </div>
                 </dl>
               </section>
@@ -317,14 +332,14 @@ export default function Home({ snapshot: initialSnapshot }: { snapshot: PurintaS
                 </Explainer>
               </section>
 
-              <section className="rounded-3xl border border-cyan-300/10 bg-cyan-300/[0.06] p-5 text-sm text-slate-300">
-                <div className="flex items-center gap-3 text-cyan-100">
+              <section className="rounded-[28px] border border-[#B2D0FF] bg-[#EDF4FF] p-5 text-sm text-[#666666] shadow-[0_7px_0_#B2D0FF]">
+                <div className="flex items-center gap-3 text-[#3E73C4]">
                   <Gauge className="h-5 w-5" />
-                  <h2 className="text-lg font-semibold text-white">Contracts</h2>
+                  <h2 className="text-lg font-black">Contracts</h2>
                 </div>
-                <div className="mt-4 space-y-2 text-sm">
+                <div className="mt-4 space-y-2 text-sm font-semibold text-[#3E73C4]">
                   <a
-                    className="block hover:text-cyan-100"
+                    className="block hover:text-[#185229]"
                     href={`https://etherscan.io/address/${snapshot.vault_address}`}
                     target="_blank"
                     rel="noreferrer"
@@ -332,7 +347,7 @@ export default function Home({ snapshot: initialSnapshot }: { snapshot: PurintaS
                     Purinta vault {shortAddress(snapshot.vault_address)}
                   </a>
                   <a
-                    className="block hover:text-cyan-100"
+                    className="block hover:text-[#185229]"
                     href={`https://etherscan.io/address/${snapshot.morpho_blue}`}
                     target="_blank"
                     rel="noreferrer"

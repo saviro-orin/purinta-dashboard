@@ -11,7 +11,12 @@
    `text-primary`, `focus-visible:outline-primary`, etc.
    Replace with your project's brand color when forking. */
 @theme {
-  --color-primary: oklch(0.55 0.2 250);
+  --color-primary: #39763d;
+  --color-purinta-green: #39763d;
+  --color-purinta-green-dark: #185229;
+  --color-purinta-cream: #fcfbf5;
+  --color-purinta-blush: #feaaa4;
+  --color-purinta-usdc: #3e73c4;
 }
 
 /* Base page colours for both modes. Cards (`bg-white dark:bg-gray-900`)
