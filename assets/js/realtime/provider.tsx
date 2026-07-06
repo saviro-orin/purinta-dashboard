@@ -17,15 +17,24 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const next = createSocket();
+    const channel = next.channel('purinta');
+
     setStatus('connecting');
+
     next.onOpen(() => setStatus('connected'));
     next.onClose(() => setStatus('disconnected'));
     next.onError(() => setStatus('errored'));
     next.connect();
     setSocket(next);
 
-    const channel = next.channel('purinta');
-    channel.join().receive('ok', () => setMarketChannel(channel));
+    channel
+      .join()
+      .receive('ok', () => {
+        setMarketChannel(channel);
+        setStatus('connected');
+      })
+      .receive('error', () => setStatus('errored'))
+      .receive('timeout', () => setStatus('errored'));
 
     return () => {
       channel.leave();

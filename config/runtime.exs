@@ -26,6 +26,7 @@ if config_env() == :prod do
   endpoint_config = [
     url: [host: host, port: url_port, scheme: scheme],
     http: [ip: {0, 0, 0, 0}, port: port],
+    check_origin: false,
     secret_key_base: get_env!.("SECRET_KEY_BASE")
   ]
 
