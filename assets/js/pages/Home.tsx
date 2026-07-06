@@ -244,7 +244,7 @@ export default function Home({ snapshot: initialSnapshot }: { snapshot: PurintaS
               <div className="rounded-[28px] border border-[#FEDBD8] bg-[#FFF5F4] p-4 text-sm text-[#666666] shadow-[0_7px_0_#FEDBD8] lg:min-w-72">
                 <p className="font-semibold text-[#8C1C5F]">Last data refresh</p>
                 <p className="mt-1 font-black text-[#333333]">{formatTime(snapshot.fetched_at)}</p>
-                <p className="mt-4 font-semibold text-[#8C1C5F]">Latest indexed block</p>
+                <p className="mt-4 font-semibold text-[#8C1C5F]">Ethereum block checked</p>
                 <p className="mt-1 font-black text-[#333333]">{snapshot.block_number?.toLocaleString() ?? 'Syncing'}</p>
               </div>
             </div>

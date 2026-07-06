@@ -59,13 +59,30 @@ defmodule PurintaDashboard.Purinta.MorphoClient do
   end
 
   defp fetch_block do
-    query = "{ _meta { block { number timestamp } } }"
-
-    case Req.post(@endpoint, json: %{query: query}, receive_timeout: 15_000) do
-      {:ok, %{status: 200, body: %{"data" => %{"_meta" => %{"block" => block}}}}} -> {:ok, block}
-      {:ok, _response} -> {:ok, %{}}
-      {:error, _reason} -> {:ok, %{}}
+    with {:ok, block_number} <- rpc("eth_blockNumber", []),
+         {:ok, block} <- rpc("eth_getBlockByNumber", [block_number, false]) do
+      {:ok,
+       %{
+         "number" => hex_to_integer(block_number),
+         "timestamp" => block |> Map.get("timestamp") |> hex_to_integer()
+       }}
+    else
+      _reason -> {:ok, %{}}
     end
+  end
+
+  defp rpc(method, params) do
+    body = %{jsonrpc: "2.0", id: 1, method: method, params: params}
+
+    case Req.post(ethereum_rpc_url(), json: body, receive_timeout: 15_000) do
+      {:ok, %{status: 200, body: %{"result" => result}}} when not is_nil(result) -> {:ok, result}
+      {:ok, response} -> {:error, {:unexpected_rpc_response, response.status, response.body}}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  defp ethereum_rpc_url do
+    System.get_env("ETHEREUM_RPC_URL", "https://ethereum-rpc.publicnode.com")
   end
 
   defp normalize_market(local, %{"state" => state}) do
@@ -149,6 +166,10 @@ defmodule PurintaDashboard.Purinta.MorphoClient do
   defp to_integer(nil), do: nil
   defp to_integer(value) when is_integer(value), do: value
   defp to_integer(value) when is_binary(value), do: String.to_integer(value)
+
+  defp hex_to_integer(nil), do: nil
+  defp hex_to_integer("0x" <> hex), do: String.to_integer(hex, 16)
+  defp hex_to_integer(value) when is_integer(value), do: value
 
   defp block_timestamp(nil), do: nil
 
