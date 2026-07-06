@@ -12,6 +12,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { useMemo } from 'react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../components/Tooltip';
 import { usePurintaSnapshots } from '../realtime/use-purinta-snapshots';
 import type { PurintaSnapshot } from '../types';
 
@@ -46,6 +47,45 @@ function formatTime(value: string | null): string {
   }).format(new Date(value));
 }
 
+function InfoTooltip({ label, children }: { label: string; children: string }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          aria-label={label}
+          className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#C8E4B0] bg-[#FCFBF5] text-[#39763D] shadow-[0_2px_0_#C8E4B0] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#39763D]"
+        >
+          <CircleHelp className="h-3.5 w-3.5" aria-hidden />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-72 rounded-2xl border border-[#C8E4B0] bg-[#185229] px-3 py-2 text-sm leading-5 text-[#FCFBF5] shadow-[0_6px_0_#C8E4B0]">
+        {children}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+function TokenLogo({ symbol, className = 'h-8 w-8' }: { symbol: string; className?: string }) {
+  const upper = symbol.toUpperCase();
+  const src = upper.includes('PEPE')
+    ? 'https://app.purinta.xyz/assets/Pepe-BV89tIWU.svg'
+    : upper.includes('SPX')
+      ? 'https://app.purinta.xyz/assets/Spx-BF2tRkT5.svg'
+      : '/images/tokens/usdc.svg';
+
+  return <img src={src} alt={`${symbol} logo`} className={`${className} rounded-full object-contain`} loading="lazy" />;
+}
+
+function LabelWithTooltip({ label, tooltip }: { label: string; tooltip: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      {label}
+      <InfoTooltip label={`What is ${label}?`}>{tooltip}</InfoTooltip>
+    </span>
+  );
+}
+
 function StatusPill({ status }: { status: string }) {
   const live = status === 'connected';
   const waiting = status === 'connecting';
@@ -64,12 +104,14 @@ function StatCard({
   value,
   detail,
   icon: Icon,
+  tooltip,
   tone = 'green',
 }: {
   label: string;
   value: string;
   detail: string;
   icon: LucideIcon;
+  tooltip?: string;
   tone?: 'green' | 'blush' | 'blue';
 }) {
   const toneClass = {
@@ -82,7 +124,9 @@ function StatCard({
     <section className="rounded-[28px] border border-[#F0EDD4] bg-white/85 p-5 shadow-[0_7px_0_#F0EDD4,0_18px_40px_rgba(57,118,61,0.08)] backdrop-blur">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold text-[#666666]">{label}</p>
+          <p className="text-sm font-semibold text-[#666666]">
+            {tooltip ? <LabelWithTooltip label={label} tooltip={tooltip} /> : label}
+          </p>
           <p className="mt-3 text-3xl font-black tracking-tight text-[#185229]">{value}</p>
         </div>
         <div className={`rounded-2xl border p-2 ${toneClass}`}>
@@ -119,44 +163,73 @@ function MarketCard({ market }: { market: PurintaSnapshot['markets'][number] }) 
           <div
             className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl border border-[#C8E4B0] ${mascotTone} text-xl font-black text-[#185229] shadow-[0_4px_0_#C8E4B0]`}
           >
-            {market.collateral_symbol.slice(0, 1)}
+            <TokenLogo symbol={market.collateral_symbol} className="h-10 w-10" />
           </div>
           <div>
             <p className="text-xs font-black uppercase tracking-[0.22em] text-[#39763D]">Meme collateral market</p>
             <h2 className="mt-2 text-2xl font-black text-[#185229]">{market.name}</h2>
-            <p className="mt-2 text-sm leading-6 text-[#666666]">
-              Borrow USDC using {market.collateral_symbol} collateral. LLTV is the maximum loan-to-value before the
-              position becomes risky.
+            <p className="mt-2 flex flex-wrap items-center gap-1.5 text-sm leading-6 text-[#666666]">
+              Borrow <TokenLogo symbol="USDC" className="h-5 w-5" /> USDC using{' '}
+              <TokenLogo symbol={market.collateral_symbol} className="h-5 w-5" /> {market.collateral_symbol} collateral.
+              LLTV is the maximum loan-to-value before the position becomes risky.
             </p>
           </div>
         </div>
         <div className="w-fit rounded-full border border-[#FEDBD8] bg-[#FFF5F4] px-3 py-1 text-xs font-black text-[#8C1C5F] shadow-[0_3px_0_#FEDBD8]">
-          LLTV {pct(market.lltv)}
+          <LabelWithTooltip
+            label={`LLTV ${pct(market.lltv)}`}
+            tooltip="LLTV is the highest loan-to-value allowed by this market. A 62.5% LLTV means each $100 of collateral can support up to $62.50 of debt before buffers."
+          />
         </div>
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-3 text-sm lg:grid-cols-4">
         <div className="rounded-2xl border border-[#F0EDD4] bg-white p-4">
-          <p className="font-semibold text-[#666666]">Borrowed now</p>
+          <p className="font-semibold text-[#666666]">
+            <LabelWithTooltip
+              label="Borrowed now"
+              tooltip="USDC that has already been drawn by borrowers in this market."
+            />
+          </p>
           <p className="mt-1 text-lg font-black text-[#185229]">${money(borrow, 2)}</p>
         </div>
         <div className="rounded-2xl border border-[#F0EDD4] bg-white p-4">
-          <p className="font-semibold text-[#666666]">Supplied liquidity</p>
+          <p className="font-semibold text-[#666666]">
+            <LabelWithTooltip
+              label="Supplied liquidity"
+              tooltip="Total USDC supplied to this Morpho market. Borrowers can draw from this pool."
+            />
+          </p>
           <p className="mt-1 text-lg font-black text-[#185229]">${money(supply, 2)}</p>
         </div>
         <div className="rounded-2xl border border-[#F0EDD4] bg-white p-4">
-          <p className="font-semibold text-[#666666]">Borrow APY</p>
+          <p className="font-semibold text-[#666666]">
+            <LabelWithTooltip
+              label="Borrow APY"
+              tooltip="Annualized rate borrowers are paying to borrow USDC from this market right now."
+            />
+          </p>
           <p className="mt-1 text-lg font-black text-[#39763D]">{pct(market.borrow_apy)}</p>
         </div>
         <div className="rounded-2xl border border-[#F0EDD4] bg-white p-4">
-          <p className="font-semibold text-[#666666]">Net supply APY</p>
+          <p className="font-semibold text-[#666666]">
+            <LabelWithTooltip
+              label="Net supply APY"
+              tooltip="Annualized rate suppliers earn after market-level effects. This is not a guaranteed return."
+            />
+          </p>
           <p className="mt-1 text-lg font-black text-[#3E73C4]">{pct(market.net_supply_apy)}</p>
         </div>
       </div>
 
       <div className="mt-6 rounded-2xl border border-[#C8E4B0] bg-[#E7F4EC] p-4">
         <div className="flex items-center justify-between text-sm">
-          <span className="font-black text-[#185229]">Utilization</span>
+          <span className="font-black text-[#185229]">
+            <LabelWithTooltip
+              label="Utilization"
+              tooltip="Borrowed USDC divided by supplied USDC. Higher utilization can mean less available liquidity and higher rates."
+            />
+          </span>
           <span className="font-black text-[#185229]">{pct(market.utilization)}</span>
         </div>
         <div className="mt-3 h-3 rounded-full bg-[#C8E4B0]">
@@ -178,8 +251,8 @@ function MarketCard({ market }: { market: PurintaSnapshot['markets'][number] }) 
           target="_blank"
           rel="noreferrer"
         >
-          {market.collateral_symbol} token {shortAddress(market.collateral_address)}{' '}
-          <ArrowUpRight className="h-3 w-3" />
+          <TokenLogo symbol={market.collateral_symbol} className="h-5 w-5" /> {market.collateral_symbol} token{' '}
+          {shortAddress(market.collateral_address)} <ArrowUpRight className="h-3 w-3" />
         </a>
         <a
           className="inline-flex items-center gap-1 rounded-full border border-[#C8E4B0] bg-white px-3 py-1.5 font-semibold shadow-[0_3px_0_#C8E4B0] hover:bg-[#E7F4EC]"
@@ -236,9 +309,11 @@ export default function Home({ snapshot: initialSnapshot }: { snapshot: PurintaS
                 <h1 className="mt-3 text-4xl font-black tracking-tight text-[#185229] sm:text-6xl">
                   How much USDC is borrowed against Purinta meme collateral?
                 </h1>
-                <p className="mt-4 text-base leading-7 text-[#4C4C4C] sm:text-lg">
-                  A simple view of Purinta's PEPE and SPX markets on Morpho. It shows current borrow demand, available
-                  liquidity, APYs, and whether the live feed is connected.
+                <p className="mt-4 flex flex-wrap items-center gap-1.5 text-base leading-7 text-[#4C4C4C] sm:text-lg">
+                  A simple view of Purinta's <TokenLogo symbol="PEPE" className="h-6 w-6" /> PEPE and{' '}
+                  <TokenLogo symbol="SPX" className="h-6 w-6" /> SPX markets on Morpho. It shows current{' '}
+                  <TokenLogo symbol="USDC" className="h-6 w-6" /> USDC borrow demand, available liquidity, APYs, and
+                  whether the live feed is connected.
                 </p>
               </div>
               <div className="rounded-[28px] border border-[#FEDBD8] bg-[#FFF5F4] p-4 text-sm text-[#666666] shadow-[0_7px_0_#FEDBD8] lg:min-w-72">
@@ -256,6 +331,7 @@ export default function Home({ snapshot: initialSnapshot }: { snapshot: PurintaS
               value={`$${money(snapshot.total_borrow_usdc, 2)}`}
               detail="Total USDC borrowed from PEPE and SPX collateral markets."
               icon={Wallet}
+              tooltip="The live total of USDC debt across the tracked Purinta PEPE and SPX Morpho markets."
               tone="green"
             />
             <StatCard
@@ -263,6 +339,7 @@ export default function Home({ snapshot: initialSnapshot }: { snapshot: PurintaS
               value={`$${money(snapshot.total_supply_usdc, 2)}`}
               detail="USDC currently supplied to those two markets."
               icon={Coins}
+              tooltip="The size of the USDC supply pools backing the tracked Purinta markets."
               tone="green"
             />
             <StatCard
@@ -270,6 +347,7 @@ export default function Home({ snapshot: initialSnapshot }: { snapshot: PurintaS
               value={`$${money(totals.availableLiquidity, 2)}`}
               detail="Supplied USDC that has not been borrowed yet."
               icon={DatabaseZap}
+              tooltip="A simple liquidity estimate: supplied USDC minus borrowed USDC."
               tone="blue"
             />
             <StatCard
@@ -277,6 +355,7 @@ export default function Home({ snapshot: initialSnapshot }: { snapshot: PurintaS
               value={pct(snapshot.weighted_borrow_apy)}
               detail="Borrow-rate average weighted by market borrow size."
               icon={LineChart}
+              tooltip="Each market's borrow APY weighted by how much USDC is borrowed there."
               tone="blush"
             />
           </section>
@@ -300,11 +379,21 @@ export default function Home({ snapshot: initialSnapshot }: { snapshot: PurintaS
                 </div>
                 <dl className="mt-5 space-y-4 text-sm">
                   <div className="flex justify-between gap-3 border-b border-[#F0EDD4] pb-3">
-                    <dt className="font-semibold text-[#666666]">Most borrowed market</dt>
+                    <dt className="font-semibold text-[#666666]">
+                      <LabelWithTooltip
+                        label="Most borrowed market"
+                        tooltip="The tracked market with the largest outstanding USDC borrow amount."
+                      />
+                    </dt>
                     <dd className="font-black text-[#185229]">{totals.highestBorrow?.name ?? 'Waiting'}</dd>
                   </div>
                   <div className="flex justify-between gap-3 border-b border-[#F0EDD4] pb-3">
-                    <dt className="font-semibold text-[#666666]">Overall utilization</dt>
+                    <dt className="font-semibold text-[#666666]">
+                      <LabelWithTooltip
+                        label="Overall utilization"
+                        tooltip="Total borrowed USDC divided by total supplied USDC across PEPE and SPX."
+                      />
+                    </dt>
                     <dd className="font-black text-[#185229]">{pct(totals.utilization)}</dd>
                   </div>
                   <div className="flex justify-between gap-3 border-b border-[#F0EDD4] pb-3">
@@ -312,7 +401,12 @@ export default function Home({ snapshot: initialSnapshot }: { snapshot: PurintaS
                     <dd className="font-black text-[#185229]">{snapshot.markets.length}</dd>
                   </div>
                   <div className="flex justify-between gap-3">
-                    <dt className="font-semibold text-[#666666]">Data source</dt>
+                    <dt className="font-semibold text-[#666666]">
+                      <LabelWithTooltip
+                        label="Data source"
+                        tooltip="Market balances and APYs come from Morpho Blue API. Ethereum block height comes from JSON-RPC."
+                      />
+                    </dt>
                     <dd className="font-black text-[#185229]">Morpho Blue</dd>
                   </div>
                 </dl>

@@ -8,7 +8,7 @@ Phoenix 1.8 + Inertia React application for monitoring Purinta markets.
 - Root page is `assets/js/pages/Home.tsx` rendered by `PurintaDashboardWeb.PageController`.
 - Live updates use the anonymous Phoenix channel topic `purinta`.
 - `PurintaDashboard.Purinta.MarketPoller` fetches live Morpho state, persists a `market_snapshots` row, and broadcasts the payload.
-- Keep the app mobile-first and visually close to Purinta: dark navy background, cyan/blue glow, rounded glass cards, clear financial labels.
+- Keep the app mobile-first and visually close to Purinta: cream base, green/mint/blush panels, USDC-blue accents, rounded raised cards, and clear financial labels.
 - Phoenix reads normalized indexed snapshots from Postgres. The optional Envio HyperIndex scaffold lives in `indexer/` and should stay sidecar-shaped, not embedded through NIFs.
 - Do not expose secrets. `ENVIO_API_TOKEN`, database passwords, and Phoenix secrets belong in `.env`/deployment secrets only.
 
