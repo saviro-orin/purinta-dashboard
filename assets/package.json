@@ -24,9 +24,11 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.16",
+    "@tailwindcss/cli": "^4.1.12",
     "@types/node": "^25.9.1",
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
-    "axe-core": "^4.11.4"
+    "axe-core": "^4.11.4",
+    "tailwindcss": "^4.1.12"
   }
 }

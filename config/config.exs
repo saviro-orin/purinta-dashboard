@@ -38,6 +38,8 @@ config :esbuild,
 
 config :tailwind,
   version: "4.1.12",
+  version_check: false,
+  path: Path.expand("../assets/node_modules/.bin/tailwindcss", __DIR__),
   purinta_dashboard: [
     args: ~w(--input=assets/css/app.css --output=priv/static/assets/css/app.css),
     cd: Path.expand("..", __DIR__)
