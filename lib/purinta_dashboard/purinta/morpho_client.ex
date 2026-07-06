@@ -96,8 +96,8 @@ defmodule PurintaDashboard.Purinta.MorphoClient do
   end
 
   defp build_snapshot(markets, block) do
-    total_borrow = sum_decimal(markets, "borrow_usdc")
-    total_supply = sum_decimal(markets, "supply_usdc")
+    total_borrow = sum_decimal(markets, :borrow_usdc)
+    total_supply = sum_decimal(markets, :supply_usdc)
 
     weighted_borrow_apy =
       if Decimal.equal?(total_borrow, Decimal.new(0)) do
