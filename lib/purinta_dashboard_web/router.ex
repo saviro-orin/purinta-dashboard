@@ -33,5 +33,4 @@ defmodule PurintaDashboardWeb.Router do
 
     get "/health", HealthController, :show
   end
-
 end

@@ -1,10 +1,5 @@
 defmodule PurintaDashboardWeb.ChannelCase do
-  @moduledoc """
-  Test case for channels. Imports `Phoenix.ChannelTest` so suites can
-  use `connect/2`, `subscribe_and_join/3`, `assert_push/2`, etc.
-
-  Async-safe because the SQL sandbox isolates each test.
-  """
+  @moduledoc "Test case for Phoenix channel tests."
 
   use ExUnit.CaseTemplate
 
@@ -12,7 +7,6 @@ defmodule PurintaDashboardWeb.ChannelCase do
     quote do
       import Phoenix.ChannelTest
       import PurintaDashboardWeb.ChannelCase
-      import PurintaDashboard.Factory
 
       @endpoint PurintaDashboardWeb.Endpoint
     end
