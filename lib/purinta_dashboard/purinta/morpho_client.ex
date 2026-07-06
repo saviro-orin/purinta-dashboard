@@ -7,8 +7,8 @@ defmodule PurintaDashboard.Purinta.MorphoClient do
 
   @query """
   query($id: String!) {
-    marketByUniqueKey(uniqueKey: $id, chainId: 1) {
-      uniqueKey
+    marketById(marketId: $id, chainId: 1) {
+      marketId
       lltv
       loanAsset { symbol address decimals }
       collateralAsset { symbol address }
@@ -46,7 +46,7 @@ defmodule PurintaDashboard.Purinta.MorphoClient do
     body = %{query: @query, variables: %{id: market.id}}
 
     case Req.post(@endpoint, json: body, receive_timeout: 15_000) do
-      {:ok, %{status: 200, body: %{"data" => %{"marketByUniqueKey" => api_market}}}}
+      {:ok, %{status: 200, body: %{"data" => %{"marketById" => api_market}}}}
       when not is_nil(api_market) ->
         {:ok, normalize_market(market, api_market)}
 
