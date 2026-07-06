@@ -39,7 +39,7 @@ defmodule PurintaDashboard.MixProject do
       {:phoenix, "~> 1.8.5"},
       {:phoenix_ecto, "~> 4.5"},
       {:phoenix_html, "~> 4.1"},
-      {:phoenix_live_view, "~> 1.1.0"},
+      {:phoenix_live_view, "~> 1.2.5"},
       {:postgrex, ">= 0.0.0"},
       {:req, "~> 0.5"},
       {:telemetry_metrics, "~> 1.0"},
