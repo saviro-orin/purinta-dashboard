@@ -17,7 +17,7 @@ export default {
     themeSystem: 'Sistema',
   },
   home: {
-    welcome: 'Bienvenido a ElixirReactStarter',
+    welcome: 'Bienvenido a PurintaDashboard',
     stack: 'Phoenix 1.8 · Inertia.js · React · SSR',
     signedInAs: 'Sesión iniciada como',
     goToDashboard: 'Ir al panel',

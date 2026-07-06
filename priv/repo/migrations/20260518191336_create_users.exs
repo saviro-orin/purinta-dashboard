@@ -1,4 +1,4 @@
-defmodule ElixirReactStarter.Repo.Migrations.CreateUsers do
+defmodule PurintaDashboard.Repo.Migrations.CreateUsers do
   use Ecto.Migration
 
   def change do

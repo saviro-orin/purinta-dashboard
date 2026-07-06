@@ -10,176 +10,176 @@ msgid ""
 msgstr ""
 "Language: es\n"
 
-#: lib/elixir_react_starter_web/controllers/fallback_controller.ex:36
+#: lib/purinta_dashboard_web/controllers/fallback_controller.ex:36
 #, elixir-autogen, elixir-format
 msgid "Bad request."
 msgstr "Solicitud inválida."
 
-#: lib/elixir_react_starter_web/email.ex:89
+#: lib/purinta_dashboard_web/email.ex:89
 #, elixir-autogen, elixir-format
 msgid "Click the button below to choose a new password."
 msgstr "Haz clic en el botón de abajo para elegir una nueva contraseña."
 
-#: lib/elixir_react_starter_web/email.ex:62
+#: lib/purinta_dashboard_web/email.ex:62
 #, elixir-autogen, elixir-format
 msgid "Confirm email"
 msgstr "Confirmar correo"
 
-#: lib/elixir_react_starter_web/email.ex:59
-#: lib/elixir_react_starter_web/email.ex:74
+#: lib/purinta_dashboard_web/email.ex:59
+#: lib/purinta_dashboard_web/email.ex:74
 #, elixir-autogen, elixir-format
 msgid "Confirm your email"
 msgstr "Confirma tu correo"
 
-#: lib/elixir_react_starter_web/controllers/auth_controller.ex:137
+#: lib/purinta_dashboard_web/controllers/auth_controller.ex:137
 #, elixir-autogen, elixir-format
 msgid "Could not confirm your account. Please try again."
 msgstr "No pudimos confirmar tu cuenta. Inténtalo de nuevo."
 
-#: lib/elixir_react_starter_web/controllers/auth_controller.ex:72
-#: lib/elixir_react_starter_web/controllers/auth_controller.ex:108
+#: lib/purinta_dashboard_web/controllers/auth_controller.ex:72
+#: lib/purinta_dashboard_web/controllers/auth_controller.ex:108
 #, elixir-autogen, elixir-format
 msgid "Email and password are required"
 msgstr "El correo y la contraseña son obligatorios"
 
-#: lib/elixir_react_starter_web/controllers/auth_controller.ex:172
-#: lib/elixir_react_starter_web/controllers/auth_controller.ex:201
+#: lib/purinta_dashboard_web/controllers/auth_controller.ex:172
+#: lib/purinta_dashboard_web/controllers/auth_controller.ex:201
 #, elixir-autogen, elixir-format
 msgid "Email is required"
 msgstr "El correo es obligatorio"
 
-#: lib/elixir_react_starter_web/email.ex:97
+#: lib/purinta_dashboard_web/email.ex:97
 #, elixir-autogen, elixir-format
 msgid "For your security, never share this link with anyone."
 msgstr "Por tu seguridad, nunca compartas este enlace con nadie."
 
-#: lib/elixir_react_starter_web/controllers/auth_controller.ex:166
+#: lib/purinta_dashboard_web/controllers/auth_controller.ex:166
 #, elixir-autogen, elixir-format
 msgid "If that email is registered, we've sent a new confirmation link."
 msgstr "Si ese correo está registrado, hemos enviado un nuevo enlace de confirmación."
 
-#: lib/elixir_react_starter_web/controllers/auth_controller.ex:195
+#: lib/purinta_dashboard_web/controllers/auth_controller.ex:195
 #, elixir-autogen, elixir-format
 msgid "If that email is registered, we've sent a password reset link."
 msgstr "Si ese correo está registrado, hemos enviado un enlace para restablecer la contraseña."
 
-#: lib/elixir_react_starter_web/email.ex:66
+#: lib/purinta_dashboard_web/email.ex:66
 #, elixir-autogen, elixir-format
 msgid "If you didn't create this account, you can safely ignore this email."
 msgstr "Si no creaste esta cuenta, puedes ignorar este correo sin problema."
 
-#: lib/elixir_react_starter_web/controllers/auth_controller.ex:88
+#: lib/purinta_dashboard_web/controllers/auth_controller.ex:88
 #, elixir-autogen, elixir-format
 msgid "Invalid email or password"
 msgstr "Correo o contraseña incorrectos"
 
-#: lib/elixir_react_starter_web/controllers/auth_controller.ex:125
-#: lib/elixir_react_starter_web/controllers/auth_controller.ex:146
+#: lib/purinta_dashboard_web/controllers/auth_controller.ex:125
+#: lib/purinta_dashboard_web/controllers/auth_controller.ex:146
 #, elixir-autogen, elixir-format
 msgid "Invalid or expired confirmation link."
 msgstr "Enlace de confirmación inválido o caducado."
 
-#: lib/elixir_react_starter_web/controllers/auth_controller.ex:211
-#: lib/elixir_react_starter_web/controllers/auth_controller.ex:221
-#: lib/elixir_react_starter_web/controllers/auth_controller.ex:231
+#: lib/purinta_dashboard_web/controllers/auth_controller.ex:211
+#: lib/purinta_dashboard_web/controllers/auth_controller.ex:221
+#: lib/purinta_dashboard_web/controllers/auth_controller.ex:231
 #, elixir-autogen, elixir-format
 msgid "Invalid or expired reset link."
 msgstr "Enlace de restablecimiento inválido o caducado."
 
-#: lib/elixir_react_starter_web/email.ex:63
-#: lib/elixir_react_starter_web/email.ex:91
+#: lib/purinta_dashboard_web/email.ex:63
+#: lib/purinta_dashboard_web/email.ex:91
 #, elixir-autogen, elixir-format
 msgid "Or copy and paste this URL into your browser:"
 msgstr "O copia y pega esta URL en tu navegador:"
 
-#: lib/elixir_react_starter_web/controllers/auth_controller.ex:243
+#: lib/purinta_dashboard_web/controllers/auth_controller.ex:243
 #, elixir-autogen, elixir-format
 msgid "Password reset successfully. Please log in."
 msgstr "Contraseña restablecida correctamente. Inicia sesión."
 
-#: lib/elixir_react_starter_web/controllers/auth_controller.ex:97
+#: lib/purinta_dashboard_web/controllers/auth_controller.ex:97
 #, elixir-autogen, elixir-format
 msgid "Please confirm your email — we've sent you a new link."
 msgstr "Confirma tu correo — te hemos enviado un nuevo enlace."
 
-#: lib/elixir_react_starter_web/email.ex:90
+#: lib/purinta_dashboard_web/email.ex:90
 #, elixir-autogen, elixir-format
 msgid "Reset password"
 msgstr "Restablecer contraseña"
 
-#: lib/elixir_react_starter_web/email.ex:88
-#: lib/elixir_react_starter_web/email.ex:105
+#: lib/purinta_dashboard_web/email.ex:88
+#: lib/purinta_dashboard_web/email.ex:105
 #, elixir-autogen, elixir-format
 msgid "Reset your password"
 msgstr "Restablece tu contraseña"
 
-#: lib/elixir_react_starter_web/email.ex:64
+#: lib/purinta_dashboard_web/email.ex:64
 #, elixir-autogen, elixir-format
 msgid "This link expires in 1 hour."
 msgstr "Este enlace expira en 1 hora."
 
-#: lib/elixir_react_starter_web/email.ex:93
+#: lib/purinta_dashboard_web/email.ex:93
 #, elixir-autogen, elixir-format
 msgid "This link expires in 1 hour. If you didn't request a reset, you can safely ignore this email."
 msgstr "Este enlace expira en 1 hora. Si no solicitaste un restablecimiento, puedes ignorar este correo sin problema."
 
-#: lib/elixir_react_starter_web/controllers/auth_controller.ex:256
+#: lib/purinta_dashboard_web/controllers/auth_controller.ex:256
 #, elixir-autogen, elixir-format
 msgid "Token and password are required"
 msgstr "El token y la contraseña son obligatorios"
 
-#: lib/elixir_react_starter_web/controllers/fallback_controller.ex:30
+#: lib/purinta_dashboard_web/controllers/fallback_controller.ex:30
 #, elixir-autogen, elixir-format
 msgid "Unauthorized."
 msgstr "No autorizado."
 
-#: lib/elixir_react_starter_web/controllers/auth_controller.ex:60
+#: lib/purinta_dashboard_web/controllers/auth_controller.ex:60
 #, elixir-autogen, elixir-format
 msgid "We've sent you a confirmation link. Check your inbox."
 msgstr "Te hemos enviado un enlace de confirmación. Revisa tu bandeja de entrada."
 
-#: lib/elixir_react_starter_web/email.ex:61
+#: lib/purinta_dashboard_web/email.ex:61
 #, elixir-autogen, elixir-format
 msgid "Welcome — click the button below to confirm your email address."
 msgstr "Bienvenido — haz clic en el botón de abajo para confirmar tu correo."
 
-#: lib/elixir_react_starter_web/plugs/user_auth.ex:116
+#: lib/purinta_dashboard_web/plugs/user_auth.ex:116
 #, elixir-autogen, elixir-format
 msgid "You must log in to access this page."
 msgstr "Debes iniciar sesión para acceder a esta página."
 
-#: lib/elixir_react_starter_web/controllers/settings_controller.ex:51
+#: lib/purinta_dashboard_web/controllers/settings_controller.ex:51
 #, elixir-autogen, elixir-format
 msgid "Current and new password are required"
 msgstr "La contraseña actual y la nueva son obligatorias"
 
-#: lib/elixir_react_starter_web/controllers/settings_controller.ex:70
+#: lib/purinta_dashboard_web/controllers/settings_controller.ex:70
 #, elixir-autogen, elixir-format
 msgid "Incorrect password"
 msgstr "Contraseña incorrecta"
 
-#: lib/elixir_react_starter_web/controllers/settings_controller.ex:77
+#: lib/purinta_dashboard_web/controllers/settings_controller.ex:77
 #, elixir-autogen, elixir-format
 msgid "Password is required"
 msgstr "La contraseña es obligatoria"
 
-#: lib/elixir_react_starter_web/controllers/settings_controller.ex:39
+#: lib/purinta_dashboard_web/controllers/settings_controller.ex:39
 #, elixir-autogen, elixir-format
 msgid "Password updated."
 msgstr "Contraseña actualizada."
 
-#: lib/elixir_react_starter_web/controllers/settings_controller.ex:65
+#: lib/purinta_dashboard_web/controllers/settings_controller.ex:65
 #, elixir-autogen, elixir-format
 msgid "Your account has been deleted."
 msgstr "Tu cuenta ha sido eliminada."
 
-#: lib/elixir_react_starter_web/controllers/locale_controller.ex:39
-#: lib/elixir_react_starter_web/controllers/locale_controller.ex:44
+#: lib/purinta_dashboard_web/controllers/locale_controller.ex:39
+#: lib/purinta_dashboard_web/controllers/locale_controller.ex:44
 #, elixir-autogen, elixir-format
 msgid "Unsupported locale"
 msgstr "Locale no compatible"
 
-#: lib/elixir_react_starter_web/plugs/rate_limit.ex:65
+#: lib/purinta_dashboard_web/plugs/rate_limit.ex:65
 #, elixir-autogen, elixir-format
 msgid "Too many attempts. Please try again in a bit."
 msgstr "Demasiados intentos. Inténtalo de nuevo en un momento."

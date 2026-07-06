@@ -1,9 +1,9 @@
-defmodule ElixirReactStarter.MixProject do
+defmodule PurintaDashboard.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :elixir_react_starter,
+      app: :purinta_dashboard,
       version: "0.1.0",
       elixir: "~> 1.15",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -35,19 +35,19 @@ defmodule ElixirReactStarter.MixProject do
     [
       summary: [threshold: 90],
       ignore_modules: [
-        ElixirReactStarter.Application,
-        ElixirReactStarter.Context,
-        ElixirReactStarter.Mailer,
-        ElixirReactStarter.RateLimit,
-        ElixirReactStarter.Release,
-        ElixirReactStarter.Repo,
-        ElixirReactStarterWeb.DevE2EController,
-        ElixirReactStarterWeb.Endpoint,
-        ElixirReactStarterWeb.EmailText,
-        ElixirReactStarterWeb.ErrorHTML,
-        ElixirReactStarterWeb.Gettext,
-        ElixirReactStarterWeb.Layouts,
-        ElixirReactStarterWeb.Telemetry,
+        PurintaDashboard.Application,
+        PurintaDashboard.Context,
+        PurintaDashboard.Mailer,
+        PurintaDashboard.RateLimit,
+        PurintaDashboard.Release,
+        PurintaDashboard.Repo,
+        PurintaDashboardWeb.DevE2EController,
+        PurintaDashboardWeb.Endpoint,
+        PurintaDashboardWeb.EmailText,
+        PurintaDashboardWeb.ErrorHTML,
+        PurintaDashboardWeb.Gettext,
+        PurintaDashboardWeb.Layouts,
+        PurintaDashboardWeb.Telemetry,
         Mix.Tasks.Lint,
         Mix.Tasks.I18n.Check,
         ~r/^Inspect\./,
@@ -75,7 +75,7 @@ defmodule ElixirReactStarter.MixProject do
   # ex_doc's HTML ships with full-text search built in.
   defp docs do
     [
-      name: "ElixirReactStarter",
+      name: "PurintaDashboard",
       main: "readme",
       # Drop the epub formatter (default `[:html, :epub, :markdown]`).
       # `:html` is what `/dev/docs` serves; `:markdown` produces the
@@ -89,8 +89,8 @@ defmodule ElixirReactStarter.MixProject do
         Guides: ~r"docs/"
       ],
       groups_for_modules: [
-        Web: ~r/^ElixirReactStarterWeb($|\.)/,
-        Ecto: ~r/^ElixirReactStarter\.Ecto\./,
+        Web: ~r/^PurintaDashboardWeb($|\.)/,
+        Ecto: ~r/^PurintaDashboard\.Ecto\./,
         "Mix Tasks": ~r/^Mix\.Tasks\./
       ]
     ]
@@ -101,7 +101,7 @@ defmodule ElixirReactStarter.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {ElixirReactStarter.Application, []},
+      mod: {PurintaDashboard.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -169,18 +169,18 @@ defmodule ElixirReactStarter.MixProject do
       # after a build are the ones the current bundle actually references.
       "assets.build": [
         "compile",
-        "tailwind elixir_react_starter",
+        "tailwind purinta_dashboard",
         "cmd rm -rf priv/static/assets/chunks",
-        ~s(esbuild elixir_react_starter --define:process.env.NODE_ENV='"development"'),
+        ~s(esbuild purinta_dashboard --define:process.env.NODE_ENV='"development"'),
         "cmd node assets/build/generate-ssr-pages.js",
-        "esbuild elixir_react_starter_ssr"
+        "esbuild purinta_dashboard_ssr"
       ],
       "assets.deploy": [
-        "tailwind elixir_react_starter --minify",
+        "tailwind purinta_dashboard --minify",
         "cmd rm -rf priv/static/assets/chunks",
-        ~s(esbuild elixir_react_starter --minify --define:process.env.NODE_ENV='"production"'),
+        ~s(esbuild purinta_dashboard --minify --define:process.env.NODE_ENV='"production"'),
         "cmd node assets/build/generate-ssr-pages.js",
-        "esbuild elixir_react_starter_ssr",
+        "esbuild purinta_dashboard_ssr",
         "phx.digest",
         # phx.digest writes `.gz` next to every asset; this step writes the
         # brotli sibling so Plug.Static can serve whichever the request

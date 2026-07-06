@@ -1,4 +1,4 @@
-defmodule ElixirReactStarterWeb.ConnCase do
+defmodule PurintaDashboardWeb.ConnCase do
   @moduledoc """
   Test case for tests that need a `%Plug.Conn{}`.
 
@@ -13,23 +13,23 @@ defmodule ElixirReactStarterWeb.ConnCase do
 
   use ExUnit.CaseTemplate
 
-  import ElixirReactStarter.Factory
+  import PurintaDashboard.Factory
 
   using do
     quote do
-      @endpoint ElixirReactStarterWeb.Endpoint
+      @endpoint PurintaDashboardWeb.Endpoint
 
-      use ElixirReactStarterWeb, :verified_routes
+      use PurintaDashboardWeb, :verified_routes
 
       import Plug.Conn
       import Phoenix.ConnTest
-      import ElixirReactStarterWeb.ConnCase
-      import ElixirReactStarter.Factory
+      import PurintaDashboardWeb.ConnCase
+      import PurintaDashboard.Factory
     end
   end
 
   setup tags do
-    ElixirReactStarter.DataCase.setup_sandbox(tags)
+    PurintaDashboard.DataCase.setup_sandbox(tags)
     conn = Phoenix.ConnTest.build_conn()
 
     if tags[:authenticated] do
@@ -47,7 +47,7 @@ defmodule ElixirReactStarterWeb.ConnCase do
   scenarios).
   """
   def log_in_user(conn, user) do
-    token = ElixirReactStarter.Accounts.generate_user_session_token(user)
+    token = PurintaDashboard.Accounts.generate_user_session_token(user)
     Phoenix.ConnTest.init_test_session(conn, %{"user_token" => token})
   end
 end

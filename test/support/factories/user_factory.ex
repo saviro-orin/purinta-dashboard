@@ -1,4 +1,4 @@
-defmodule ElixirReactStarter.UserFactory do
+defmodule PurintaDashboard.UserFactory do
   @moduledoc """
   Factory for User records. Provides a minimal `user_factory/0` plus
   the `confirmed/1` modifier so most tests can compose as:
@@ -6,7 +6,7 @@ defmodule ElixirReactStarter.UserFactory do
       :user |> build() |> confirmed() |> insert()
   """
 
-  alias ElixirReactStarter.Accounts.User
+  alias PurintaDashboard.Accounts.User
 
   defmacro __using__(_opts) do
     quote do

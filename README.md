@@ -1,8 +1,8 @@
 <p align="center">
-  <img src=".github/logo.png" alt="ElixirReactStarter" width="220" />
+  <img src=".github/logo.png" alt="PurintaDashboard" width="220" />
 </p>
 
-<h1 align="center">ElixirReactStarter</h1>
+<h1 align="center">PurintaDashboard</h1>
 
 <p align="center">
   A production-ready Phoenix + Inertia.js (React, SSR) starter — authentication,
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/andreogle/ElixirReactStarter/actions/workflows/ci.yml">
-    <img src="https://github.com/andreogle/ElixirReactStarter/actions/workflows/ci.yml/badge.svg" alt="CI" />
+  <a href="https://github.com/andreogle/PurintaDashboard/actions/workflows/ci.yml">
+    <img src="https://github.com/andreogle/PurintaDashboard/actions/workflows/ci.yml/badge.svg" alt="CI" />
   </a>
 </p>
 
@@ -105,14 +105,14 @@ time with `mix phx.gen.secret` and store it in your secrets manager or host conf
 then build and run the release image (reading the stored values from the environment):
 
 ```bash
-docker build -t elixir_react_starter .
+docker build -t purinta_dashboard .
 docker run -p 4000:4000 \
   -e DATABASE_URL="ecto://USER:PASS@HOST/DB" \
   -e MAILJET_API_KEY="$MAILJET_API_KEY" \
   -e MAILJET_SECRET="$MAILJET_SECRET" \
   -e PHX_HOST="example.com" \
   -e SECRET_KEY_BASE="$SECRET_KEY_BASE" \
-  elixir_react_starter
+  purinta_dashboard
 ```
 
 `config/runtime.exs` requires `DATABASE_URL`, `MAILJET_API_KEY`, `MAILJET_SECRET`,

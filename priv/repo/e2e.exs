@@ -28,7 +28,7 @@ unless Mix.env() in [:dev, :test] do
   """
 end
 
-unless Application.get_env(:elixir_react_starter, :dev_routes, false) do
+unless Application.get_env(:purinta_dashboard, :dev_routes, false) do
   raise """
   priv/repo/e2e.exs requires :dev_routes to be enabled (the same config that \
   exposes the /dev/e2e/users provisioning endpoint). Refusing to run.
@@ -37,8 +37,8 @@ end
 
 import Ecto.Query
 
-alias ElixirReactStarter.Accounts.User
-alias ElixirReactStarter.Repo
+alias PurintaDashboard.Accounts.User
+alias PurintaDashboard.Repo
 
 require Logger
 

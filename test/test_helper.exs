@@ -1,2 +1,2 @@
 ExUnit.start()
-Ecto.Adapters.SQL.Sandbox.mode(ElixirReactStarter.Repo, :manual)
+Ecto.Adapters.SQL.Sandbox.mode(PurintaDashboard.Repo, :manual)

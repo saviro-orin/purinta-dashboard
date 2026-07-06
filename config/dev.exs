@@ -1,11 +1,11 @@
 import Config
 
 # Configure your database
-config :elixir_react_starter, ElixirReactStarter.Repo,
+config :purinta_dashboard, PurintaDashboard.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
-  database: "elixir_react_starter_dev",
+  database: "purinta_dashboard_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
@@ -29,16 +29,16 @@ watchers =
       esbuild:
         {Esbuild, :install_and_run,
          [
-           :elixir_react_starter,
+           :purinta_dashboard,
            ~w(--sourcemap=inline --watch --define:process.env.NODE_ENV="development")
          ]},
       node: ["build/watch-ssr-pages.js", cd: Path.expand("../assets", __DIR__)],
-      esbuild_ssr: {Esbuild, :install_and_run, [:elixir_react_starter_ssr, ~w(--watch)]},
-      tailwind: {Tailwind, :install_and_run, [:elixir_react_starter, ~w(--watch)]}
+      esbuild_ssr: {Esbuild, :install_and_run, [:purinta_dashboard_ssr, ~w(--watch)]},
+      tailwind: {Tailwind, :install_and_run, [:purinta_dashboard, ~w(--watch)]}
     ]
   end
 
-config :elixir_react_starter, ElixirReactStarterWeb.Endpoint,
+config :purinta_dashboard, PurintaDashboardWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
   http: [ip: {127, 0, 0, 1}, port: 4000],
@@ -75,7 +75,7 @@ config :elixir_react_starter, ElixirReactStarterWeb.Endpoint,
 # different ports.
 
 # Reload browser tabs when matching files change.
-config :elixir_react_starter, ElixirReactStarterWeb.Endpoint,
+config :purinta_dashboard, PurintaDashboardWeb.Endpoint,
   live_reload: [
     web_console_logger: true,
     patterns: [
@@ -84,19 +84,19 @@ config :elixir_react_starter, ElixirReactStarterWeb.Endpoint,
       # Gettext translations
       ~r"priv/gettext/.*\.po$"E,
       # Router, Controllers, LiveViews and LiveComponents
-      ~r"lib/elixir_react_starter_web/router\.ex$"E,
-      ~r"lib/elixir_react_starter_web/(controllers|live|components)/.*\.(ex|heex)$"E
+      ~r"lib/purinta_dashboard_web/router\.ex$"E,
+      ~r"lib/purinta_dashboard_web/(controllers|live|components)/.*\.(ex|heex)$"E
     ]
   ]
 
 # Enable dev routes for dashboard and mailbox
-config :elixir_react_starter, dev_routes: true
+config :purinta_dashboard, dev_routes: true
 
 # Disable auth rate limiting in development. The Playwright E2E suite drives
 # this server and legitimately makes many requests from one IP; throttling
 # is a production concern (and the limiter is covered by rate_limit_test).
 # Flip to `true` if you want to exercise the limiter locally.
-config :elixir_react_starter, rate_limit_enabled: false
+config :purinta_dashboard, rate_limit_enabled: false
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"

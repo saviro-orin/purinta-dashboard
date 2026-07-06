@@ -1,1 +1,1 @@
-call "%~dp0\elixir_react_starter" eval ElixirReactStarter.Release.migrate
+call "%~dp0\purinta_dashboard" eval PurintaDashboard.Release.migrate

@@ -25,8 +25,8 @@ defmodule Mix.Tasks.I18n.Check do
       mix i18n.check
 
   Locales, default locale, and pot domains are discovered automatically:
-    * locales: `Application.fetch_env!(:elixir_react_starter, :supported_locales)`
-    * default locale: `Application.fetch_env!(:elixir_react_starter, :default_locale)`
+    * locales: `Application.fetch_env!(:purinta_dashboard, :supported_locales)`
+    * default locale: `Application.fetch_env!(:purinta_dashboard, :default_locale)`
     * pot domains: every `priv/gettext/*.pot` file
   """
 
@@ -35,7 +35,7 @@ defmodule Mix.Tasks.I18n.Check do
   alias Expo.Message
   alias Expo.PO
 
-  @otp_app :elixir_react_starter
+  @otp_app :purinta_dashboard
 
   @hardcoded_patterns [
     {~r/put_flash\(:(info|error),\s*"[^"]+"\)/, "put_flash with hardcoded string (use dgettext)"},
@@ -45,17 +45,17 @@ defmodule Mix.Tasks.I18n.Check do
   ]
 
   @backend_scan_paths [
-    "lib/elixir_react_starter_web/controllers/**/*.ex",
-    "lib/elixir_react_starter_web/plugs/**/*.ex",
-    "lib/elixir_react_starter_web/email.ex"
+    "lib/purinta_dashboard_web/controllers/**/*.ex",
+    "lib/purinta_dashboard_web/plugs/**/*.ex",
+    "lib/purinta_dashboard_web/email.ex"
   ]
 
   # HEEx templates scanned for hardcoded user-facing prose. Component sigil
   # heredocs inside .ex files are not scanned — keep prose out of those.
   @heex_scan_paths [
-    "lib/elixir_react_starter_web/components/layouts/*.html.heex",
-    "lib/elixir_react_starter_web/controllers/email_html/*.html.heex",
-    "lib/elixir_react_starter_web/controllers/email_text/*.text.heex"
+    "lib/purinta_dashboard_web/components/layouts/*.html.heex",
+    "lib/purinta_dashboard_web/controllers/email_html/*.html.heex",
+    "lib/purinta_dashboard_web/controllers/email_text/*.text.heex"
   ]
 
   @impl true
@@ -411,7 +411,7 @@ defmodule Mix.Tasks.I18n.Check do
   #
   # Heuristic — flag text nodes that look like English prose (≥3 letter
   # sequences, at least one ≥4 chars, at least one lowercase letter).
-  # Brand strings ("ElixirReactStarter"), single-word labels, and pure
+  # Brand strings ("PurintaDashboard"), single-word labels, and pure
   # interpolated content (`{@assigns}`) are deliberately not flagged.
   # =============================================================================
   defp check_heex_hardcoded_strings do

@@ -1,4 +1,4 @@
-defmodule ElixirReactStarterWeb.ChannelCase do
+defmodule PurintaDashboardWeb.ChannelCase do
   @moduledoc """
   Test case for channels. Imports `Phoenix.ChannelTest` so suites can
   use `connect/2`, `subscribe_and_join/3`, `assert_push/2`, etc.
@@ -11,15 +11,15 @@ defmodule ElixirReactStarterWeb.ChannelCase do
   using do
     quote do
       import Phoenix.ChannelTest
-      import ElixirReactStarterWeb.ChannelCase
-      import ElixirReactStarter.Factory
+      import PurintaDashboardWeb.ChannelCase
+      import PurintaDashboard.Factory
 
-      @endpoint ElixirReactStarterWeb.Endpoint
+      @endpoint PurintaDashboardWeb.Endpoint
     end
   end
 
   setup tags do
-    ElixirReactStarter.DataCase.setup_sandbox(tags)
+    PurintaDashboard.DataCase.setup_sandbox(tags)
     :ok
   end
 end

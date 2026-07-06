@@ -8,13 +8,13 @@
 import Config
 
 config :inertia,
-  endpoint: ElixirReactStarterWeb.Endpoint,
+  endpoint: PurintaDashboardWeb.Endpoint,
   history: [encrypt: true],
   ssr: true,
   raise_on_ssr_failure: true
 
-config :elixir_react_starter,
-  ecto_repos: [ElixirReactStarter.Repo],
+config :purinta_dashboard,
+  ecto_repos: [PurintaDashboard.Repo],
   generators: [timestamp_type: :utc_datetime],
   supported_locales: ~w(en es),
   default_locale: "en"
@@ -26,8 +26,8 @@ config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
 
 # Oban powers background jobs. Add per-app cron entries under
 # Oban.Plugins.Cron when workers are introduced.
-config :elixir_react_starter, Oban,
-  repo: ElixirReactStarter.Repo,
+config :purinta_dashboard, Oban,
+  repo: PurintaDashboard.Repo,
   engine: Oban.Engines.Basic,
   queues: [default: 10],
   plugins: [
@@ -35,14 +35,14 @@ config :elixir_react_starter, Oban,
   ]
 
 # Configure the endpoint
-config :elixir_react_starter, ElixirReactStarterWeb.Endpoint,
+config :purinta_dashboard, PurintaDashboardWeb.Endpoint,
   url: [host: "localhost"],
   adapter: Bandit.PhoenixAdapter,
   render_errors: [
-    formats: [html: ElixirReactStarterWeb.ErrorHTML, json: ElixirReactStarterWeb.ErrorJSON],
+    formats: [html: PurintaDashboardWeb.ErrorHTML, json: PurintaDashboardWeb.ErrorJSON],
     layout: false
   ],
-  pubsub_server: ElixirReactStarter.PubSub,
+  pubsub_server: PurintaDashboard.PubSub,
   live_view: [signing_salt: "c16iCWOT"]
 
 # Configure the mailer
@@ -52,12 +52,12 @@ config :elixir_react_starter, ElixirReactStarterWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :elixir_react_starter, ElixirReactStarter.Mailer, adapter: Swoosh.Adapters.Local
+config :purinta_dashboard, PurintaDashboard.Mailer, adapter: Swoosh.Adapters.Local
 
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.28.0",
-  elixir_react_starter: [
+  purinta_dashboard: [
     # --conditions=production picks the "production" branch of every
     # subpath in package.json `exports` blocks. Some packages gate
     # their dist files behind development/production conditions —
@@ -72,7 +72,7 @@ config :esbuild,
     cd: Path.expand("../assets", __DIR__),
     env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
   ],
-  elixir_react_starter_ssr: [
+  purinta_dashboard_ssr: [
     # SSR is Node-side; it never executes React.lazy callbacks, so
     # any CSS / fonts that those chunks pull in are dead weight here.
     # The empty loaders short-circuit them so esbuild can still
@@ -87,7 +87,7 @@ config :esbuild,
 # Configure tailwind (the version is required)
 config :tailwind,
   version: "4.1.12",
-  elixir_react_starter: [
+  purinta_dashboard: [
     args: ~w(
       --input=assets/css/app.css
       --output=priv/static/assets/css/app.css

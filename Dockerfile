@@ -111,7 +111,7 @@ ENV MIX_ENV="prod"
 ENV PORT=4000
 EXPOSE 4000
 
-COPY --from=builder --chown=app:app /app/_build/prod/rel/elixir_react_starter ./
+COPY --from=builder --chown=app:app /app/_build/prod/rel/purinta_dashboard ./
 
 # Liveness probe against the public /health endpoint. Reuses the Node
 # binary that's already here for SSR — no curl/wget needed. Node 26

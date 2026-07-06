@@ -5,30 +5,30 @@ import Config
 # The MIX_TEST_PARTITION environment variable can be used
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
-config :elixir_react_starter, ElixirReactStarter.Repo,
+config :purinta_dashboard, PurintaDashboard.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
-  database: "elixir_react_starter_test#{System.get_env("MIX_TEST_PARTITION")}",
+  database: "purinta_dashboard_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
-config :elixir_react_starter, ElixirReactStarterWeb.Endpoint,
+config :purinta_dashboard, PurintaDashboardWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
   secret_key_base: "KsgZWbuwrS5Cm+BzSXFR0V5tOLLdCWM+VQbjxPIQoHuTQ5sExs2PS5IIE+6MwVo4",
   server: false
 
 # In test we don't send emails
-config :elixir_react_starter, ElixirReactStarter.Mailer, adapter: Swoosh.Adapters.Test
+config :purinta_dashboard, PurintaDashboard.Mailer, adapter: Swoosh.Adapters.Test
 
 # Disable swoosh api client as it is only required for production adapters
 config :swoosh, :api_client, false
 
 # Disable auth rate limiting in tests so repeated requests from 127.0.0.1
 # don't trip the limiter. The limiter logic is covered by rate_limit_test.
-config :elixir_react_starter, rate_limit_enabled: false
+config :purinta_dashboard, rate_limit_enabled: false
 
 # Skip SSR in tests — no Node.js worker pool is started under MIX_ENV=test,
 # and Inertia's controller would block trying to call into it. Tests assert
@@ -41,7 +41,7 @@ config :argon2_elixir, t_cost: 1, m_cost: 8
 
 # Run Oban in manual testing mode — jobs are enqueued but not executed
 # automatically. Tests assert on the job queue or drain explicitly.
-config :elixir_react_starter, Oban, testing: :manual
+config :purinta_dashboard, Oban, testing: :manual
 
 # Print only warnings and errors during test
 config :logger, level: :warning
