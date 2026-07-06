@@ -1,0 +1,10 @@
+type MarketEvent {
+  id: ID!
+  marketId: String!
+  eventName: String!
+  account: String!
+  assets: BigInt!
+  blockNumber: Int!
+  timestamp: Int!
+  transactionHash: String!
+}

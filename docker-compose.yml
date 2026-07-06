@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-purinta_dashboard_prod}
+    volumes:
+      - purinta-dashboard-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-purinta_dashboard_prod}"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  web:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: ecto://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-purinta_dashboard_prod}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:-local_dev_secret_key_base_that_is_long_enough_for_phoenix_signed_cookies_1234567890}
+      PHX_HOST: ${PHX_HOST:-localhost}
+      PHX_SCHEME: http
+      PHX_URL_PORT: "4300"
+      PORT: "4300"
+      FORCE_SSL: "false"
+      PURINTA_POLL_INTERVAL_MS: ${PURINTA_POLL_INTERVAL_MS:-30000}
+    ports:
+      - "4300:4300"
+    command: ["/bin/sh", "-c", "/app/bin/migrate && /app/bin/server"]
+
+  envio-indexer:
+    profiles: ["indexer"]
+    build:
+      context: ./indexer
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ENVIO_API_TOKEN: ${ENVIO_API_TOKEN}
+      ENVIO_PG_HOST: db
+      ENVIO_PG_PORT: 5432
+      ENVIO_PG_USER: ${POSTGRES_USER:-postgres}
+      ENVIO_PG_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      ENVIO_PG_DATABASE: ${POSTGRES_DB:-purinta_dashboard_prod}
+      ENVIO_PG_PUBLIC_SCHEMA: envio
+      HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_GRAPHQL_ADMIN_SECRET:-testing}
+      TUI_OFF: "true"
+      LOG_LEVEL: info
+
+volumes:
+  purinta-dashboard-db:

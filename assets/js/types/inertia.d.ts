@@ -1,13 +1,8 @@
-import '@inertiajs/core';
-import type { CurrentUser, Flash } from '../types';
+import type { Flash } from './types';
 
 declare module '@inertiajs/core' {
-  interface InertiaConfig {
-    sharedPageProps: {
-      current_user: CurrentUser | null;
-      locale: string;
-      flash: Flash;
-      socket_token: string | null;
-    };
+  interface PageProps {
+    flash?: Flash;
+    socket_path?: string;
   }
 }

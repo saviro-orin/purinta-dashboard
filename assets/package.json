@@ -3,13 +3,9 @@
     "npm": ">=11.10.0"
   },
   "scripts": {
-    "e2e": "playwright test",
-    "e2e:headed": "playwright test --headed",
-    "e2e:install": "playwright install chromium",
-    "e2e:ui": "playwright test --ui",
     "fmt": "npm run lint:fix && biome format --write",
-    "lint": "biome check build/ css/ e2e/ js/",
-    "lint:fix": "biome check --write build/ css/ e2e/ js/"
+    "lint": "biome check build/ css/ js/",
+    "lint:fix": "biome check --write build/ css/ js/"
   },
   "dependencies": {
     "@api3/promise-utils": "^0.4.0",
@@ -21,16 +17,13 @@
     "@radix-ui/react-toast": "^1.2.15",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@types/phoenix": "^1.6.7",
-    "i18next": "^26.3.0",
     "lucide-react": "^1.17.0",
     "phoenix": "^1.8.5",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "react-i18next": "^17.0.2"
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.16",
-    "@playwright/test": "^1.60.0",
     "@types/node": "^25.9.1",
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",

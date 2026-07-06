@@ -1,107 +1,34 @@
 import Config
 
-# config/runtime.exs is executed for all environments, including
-# during releases. It is executed after compilation and before the
-# system starts, so it is typically used to load production configuration
-# and secrets from environment variables or elsewhere. Do not define
-# any compile-time configuration in here, as it won't be applied.
-# The block below contains prod specific runtime configuration.
-
-# ## Using releases
-#
-# If you use `mix release`, you need to explicitly enable the server
-# by passing the PHX_SERVER=true when you start it:
-#
-#     PHX_SERVER=true bin/purinta_dashboard start
-#
-# Alternatively, you can use `mix phx.gen.release` to generate a `bin/server`
-# script that automatically sets the env var above.
 if System.get_env("PHX_SERVER") do
   config :purinta_dashboard, PurintaDashboardWeb.Endpoint, server: true
 end
 
 if config_env() == :prod do
-  # Tiny helper for the common "fetch env var, raise if missing" pattern.
   get_env! = fn name ->
-    System.get_env(name) ||
-      raise("environment variable #{name} is missing")
+    System.get_env(name) || raise("environment variable #{name} is missing")
   end
-
-  config :purinta_dashboard, PurintaDashboardWeb.Endpoint,
-    http: [port: String.to_integer(System.get_env("PORT", "4000"))]
 
   maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
 
   config :purinta_dashboard, PurintaDashboard.Repo,
-    # ssl: true,
     url: get_env!.("DATABASE_URL"),
-    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
-    # For machines with several cores, consider starting multiple pools of `pool_size`
-    # pool_count: 4,
+    pool_size: String.to_integer(System.get_env("POOL_SIZE", "10")),
     socket_options: maybe_ipv6
 
-  # The secret key base is used to sign/encrypt cookies and other secrets.
-  # A default value is used in config/dev.exs and config/test.exs but you
-  # want to use a different value for prod and you most likely don't want
-  # to check this value into version control, so we use an environment
-  # variable instead. Generate one with `mix phx.gen.secret`.
-  secret_key_base = get_env!.("SECRET_KEY_BASE")
-
-  host = System.get_env("PHX_HOST") || "example.com"
+  host = System.get_env("PHX_HOST", "localhost")
+  port = String.to_integer(System.get_env("PORT", "4000"))
+  scheme = System.get_env("PHX_SCHEME", "http")
 
   config :purinta_dashboard, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
   config :purinta_dashboard, PurintaDashboardWeb.Endpoint,
-    url: [host: host, port: 443, scheme: "https"],
-    http: [
-      # Enable IPv6 and bind on all interfaces.
-      # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
-      # See the documentation on https://hexdocs.pm/bandit/Bandit.html#t:options/0
-      # for details about using IPv6 vs IPv4 and loopback vs public addresses.
-      ip: {0, 0, 0, 0, 0, 0, 0, 0}
+    url: [
+      host: host,
+      port: String.to_integer(System.get_env("PHX_URL_PORT", Integer.to_string(port))),
+      scheme: scheme
     ],
-    secret_key_base: secret_key_base
-
-  # ## SSL Support
-  #
-  # To get SSL working, you will need to add the `https` key
-  # to your endpoint configuration:
-  #
-  #     config :purinta_dashboard, PurintaDashboardWeb.Endpoint,
-  #       https: [
-  #         ...,
-  #         port: 443,
-  #         cipher_suite: :strong,
-  #         keyfile: System.get_env("SOME_APP_SSL_KEY_PATH"),
-  #         certfile: System.get_env("SOME_APP_SSL_CERT_PATH")
-  #       ]
-  #
-  # The `cipher_suite` is set to `:strong` to support only the
-  # latest and more secure SSL ciphers. This means old browsers
-  # and clients may not be supported. You can set it to
-  # `:compatible` for wider support.
-  #
-  # `:keyfile` and `:certfile` expect an absolute path to the key
-  # and cert in disk or a relative path inside priv, for example
-  # "priv/ssl/server.key". For all supported SSL configuration
-  # options, see https://hexdocs.pm/plug/Plug.SSL.html#configure/1
-  #
-  # We also recommend setting `force_ssl` in your config/prod.exs,
-  # ensuring no data is ever sent via http, always redirecting to https:
-  #
-  #     config :purinta_dashboard, PurintaDashboardWeb.Endpoint,
-  #       force_ssl: [hsts: true]
-  #
-  # Check `Plug.SSL` for all available options in `force_ssl`.
-
-  # Outbound mail via Mailjet. `Swoosh.Adapters.Mailjet` ships with the
-  # `:swoosh` package, so no extra mix dep is needed. The API client
-  # (`Swoosh.ApiClient.Req`) is wired at compile time in config/prod.exs.
-  #
-  # Provision an API key + secret at https://app.mailjet.com/account/api_keys
-  # and expose them as MAILJET_API_KEY / MAILJET_SECRET in the deploy env.
-  config :purinta_dashboard, PurintaDashboard.Mailer,
-    adapter: Swoosh.Adapters.Mailjet,
-    api_key: get_env!.("MAILJET_API_KEY"),
-    secret: get_env!.("MAILJET_SECRET")
+    http: [ip: {0, 0, 0, 0}, port: port],
+    secret_key_base: get_env!.("SECRET_KEY_BASE"),
+    force_ssl: System.get_env("FORCE_SSL") in ~w(true 1)
 end

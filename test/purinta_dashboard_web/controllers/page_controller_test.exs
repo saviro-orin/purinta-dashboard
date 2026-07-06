@@ -1,9 +1,8 @@
 defmodule PurintaDashboardWeb.PageControllerTest do
-  use PurintaDashboardWeb.ConnCase
+  use PurintaDashboardWeb.ConnCase, async: true
 
-  test "GET / renders the Home Inertia page", %{conn: conn} do
+  test "GET / renders the dashboard", %{conn: conn} do
     conn = get(conn, ~p"/")
-    body = html_response(conn, 200)
-    assert body =~ ~s(&quot;component&quot;:&quot;Home&quot;)
+    assert html_response(conn, 200) =~ "Purinta Dashboard"
   end
 end
