@@ -1,0 +1,59 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { Hono } from 'hono';
+import { serveStatic } from 'hono/bun';
+import { config } from './config';
+import { db } from './db';
+import { runMigrations } from './migrations';
+import { startPoller } from './poller';
+import { latestSnapshot } from './snapshots';
+import { primeSnapshot, registerSocket, unregisterSocket, type WebSocketData } from './websocket';
+
+runMigrations(db);
+primeSnapshot(latestSnapshot(db));
+
+const app = new Hono();
+const clientRoot = './dist/client';
+const indexPath = join(clientRoot, 'index.html');
+
+app.get('/health', (c) => c.json({ status: 'ok' }));
+app.get('/api/snapshot', (c) => c.json(latestSnapshot(db)));
+app.use('/assets/*', serveStatic({ root: clientRoot }));
+app.use('/images/*', serveStatic({ root: './public' }));
+app.use('/favicon.ico', serveStatic({ root: clientRoot }));
+app.get('*', (c) => {
+  if (!existsSync(indexPath)) return c.text('Frontend has not been built. Run bun run build.', 503);
+  return c.html(readFileSync(indexPath, 'utf8'));
+});
+
+startPoller(db);
+
+const server = Bun.serve<WebSocketData>({
+  port: config.PORT,
+  fetch(request, server) {
+    const url = new URL(request.url);
+
+    if (url.pathname === '/ws') {
+      const upgraded = server.upgrade(request, {
+        data: { clientId: crypto.randomUUID() },
+      });
+      if (upgraded) return;
+      return new Response('WebSocket upgrade failed', { status: 400 });
+    }
+
+    return app.fetch(request);
+  },
+  websocket: {
+    open(socket) {
+      registerSocket(socket);
+    },
+    close(socket) {
+      unregisterSocket(socket);
+    },
+    message() {
+      // The dashboard is server-push only for now.
+    },
+  },
+});
+
+console.log(`Purinta dashboard listening on http://0.0.0.0:${server.port}`);

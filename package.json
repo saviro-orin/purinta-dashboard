@@ -1,0 +1,38 @@
+{
+  "name": "purinta-dashboard",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch server/index.ts",
+    "build": "vite build && bun build server/index.ts --target=bun --outdir=dist/server --external=bun:sqlite",
+    "start": "bun dist/server/index.js",
+    "lint": "biome check client server scripts test vite.config.ts",
+    "fmt": "biome check --write client server scripts test vite.config.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "verify": "bun run lint && bun run typecheck && bun test && bun run build",
+    "smoke:http": "bun scripts/smoke-http.ts",
+    "smoke:ws": "bun scripts/smoke-ws.ts"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "^0.7.5",
+    "@radix-ui/react-tooltip": "^1.2.8",
+    "@tailwindcss/vite": "^4.1.12",
+    "decimal.js": "^10.6.0",
+    "hono": "^4.10.6",
+    "lucide-react": "^1.17.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "vite": "^7.2.7",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.16",
+    "@types/bun": "^1.3.4",
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3",
+    "tailwindcss": "^4.1.12",
+    "typescript": "^6.0.0"
+  }
+}
