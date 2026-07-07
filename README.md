@@ -1,48 +1,76 @@
 # Purinta Dashboard
 
-Mobile-friendly Phoenix + React dashboard for monitoring Purinta's live Morpho markets.
+Mobile-friendly Bun + React dashboard for monitoring Purinta's live Morpho markets.
 
 ## What it shows
 
 - Active USDC borrows for Purinta's PEPE and SPX collateral markets.
-- Supply, utilization, borrow APY, supply APY, and net supply APY.
-- Morpho/Purinta contract links and current indexed block metadata.
-- Live browser refresh over Phoenix Channels as new snapshots are fetched.
+- Supply, borrow, utilization, LLTV, borrow APY, supply APY, and net supply APY.
+- Ethereum block height checked for the current snapshot.
+- Live browser updates over a native WebSocket.
 
-## Architecture
+## Stack
+
+- Bun + Hono for the HTTP/WebSocket server.
+- SQLite for persisted market snapshots.
+- Vite + React + Tailwind for the frontend.
+- Optional Envio HyperIndex scaffold in `indexer/` for future event indexing.
+
+## Local development
+
+```bash
+bun install
+bun run dev
+```
+
+The server defaults to:
 
 ```text
-Phoenix/Inertia dashboard ── reads ── Postgres market_snapshots
-          ▲                                ▲
-          │ Phoenix Channel broadcasts      │
-          └──── MarketPoller fetches Morpho ┘
+http://localhost:4300
 ```
 
-The app stores normalized market snapshots in Postgres. The repo also includes an optional Envio HyperIndex sidecar scaffold under `indexer/` for event indexing once an `ENVIO_API_TOKEN` is provided.
-
-## Local Docker
+Build and verify:
 
 ```bash
-cp .env.example .env
-docker compose up --build
+bun run verify
 ```
 
-Open: <http://localhost:4300>
-
-## Development
+## Docker
 
 ```bash
-mise trust && mise install
-mix setup
-mix phx.server
+docker compose up -d --build
 ```
 
-## Verification
+Open:
+
+```text
+http://localhost:4300
+http://192.168.1.182:4300
+```
+
+SQLite snapshots are stored in:
+
+```text
+./data/purinta-dashboard.sqlite3
+```
+
+## Smoke checks
 
 ```bash
-mix precommit
-npm --prefix assets run lint
-docker compose up --build
-curl -fsS http://localhost:4300/health
-curl -fsS http://localhost:4300/api/snapshot
+bun run smoke:http
+bun run smoke:ws
+```
+
+## Environment
+
+See `.env.example`.
+
+Common values:
+
+```env
+PORT=4300
+SQLITE_PATH=./data/purinta-dashboard.sqlite3
+PURINTA_POLL_INTERVAL_MS=30000
+ETHEREUM_RPC_URL=https://ethereum-rpc.publicnode.com
+MORPHO_GRAPHQL_URL=https://blue-api.morpho.org/graphql
 ```

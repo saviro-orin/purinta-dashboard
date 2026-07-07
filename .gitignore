@@ -43,9 +43,14 @@ purinta_dashboard-*.tar
 /priv/static/robots-*.txt
 /priv/static/images/logo-*.svg
 
-# In case you use Node.js/npm, you want to ignore these.
+# In case you use Node.js/npm/Bun, you want to ignore these.
 npm-debug.log
+/node_modules/
 /assets/node_modules/
+
+# Bun/Vite runtime artifacts
+/dist/
+/data/
 
 # Playwright E2E (assets/e2e) artefacts
 /assets/playwright-report/
