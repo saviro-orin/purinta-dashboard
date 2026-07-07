@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import './css/app.css';
 import { App } from './App';
+import { TooltipProvider } from './components/Tooltip';
 import { RealtimeProvider } from './realtime/provider';
 
 const root = document.getElementById('root');
@@ -10,7 +11,9 @@ if (!root) {
 }
 
 createRoot(root).render(
-  <RealtimeProvider>
-    <App />
-  </RealtimeProvider>
+  <TooltipProvider>
+    <RealtimeProvider>
+      <App />
+    </RealtimeProvider>
+  </TooltipProvider>
 );
