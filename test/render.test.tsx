@@ -44,6 +44,7 @@ describe('Home page rendering', () => {
     );
 
     expect(html).toContain('How much USDC is borrowed');
+    expect(html).toContain('Market table');
     expect(html).toContain('PEPE / USDC');
   });
 });

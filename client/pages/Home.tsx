@@ -150,120 +150,174 @@ function Explainer({ title, children }: { title: string; children: string }) {
   );
 }
 
-function MarketCard({ market }: { market: PurintaSnapshot['markets'][number] }) {
-  const utilization = Math.min(100, Math.max(0, numberValue(market.utilization)));
-  const borrow = numberValue(market.borrow_usdc);
-  const supply = numberValue(market.supply_usdc);
-  const mascotTone = market.collateral_symbol.toUpperCase().includes('PEPE') ? 'bg-[#E7F4EC]' : 'bg-[#FFF5F4]';
+function MiniMetric({ label, value, tooltip }: { label: string; value: string; tooltip: string }) {
+  return (
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#666666]">
+        <LabelWithTooltip label={label} tooltip={tooltip} />
+      </p>
+      <p className="mt-1 text-base font-black text-[#185229]">{value}</p>
+    </div>
+  );
+}
+
+function UtilizationBar({ value }: { value: string }) {
+  const utilization = Math.min(100, Math.max(0, numberValue(value)));
 
   return (
-    <article className="rounded-[32px] border border-[#E5E1BE] bg-[#FCFBF5]/95 p-5 shadow-[0_8px_0_#D6D2B2,0_22px_50px_rgba(51,51,51,0.08)] sm:p-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex gap-4">
-          <div
-            className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl border border-[#C8E4B0] ${mascotTone} text-xl font-black text-[#185229] shadow-[0_4px_0_#C8E4B0]`}
-          >
-            <TokenLogo symbol={market.collateral_symbol} className="h-10 w-10" />
-          </div>
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-[#39763D]">Meme collateral market</p>
-            <h2 className="mt-2 text-2xl font-black text-[#185229]">{market.name}</h2>
-            <p className="mt-2 flex flex-wrap items-center gap-1.5 text-sm leading-6 text-[#666666]">
-              Borrow <TokenLogo symbol="USDC" className="h-5 w-5" /> USDC using{' '}
-              <TokenLogo symbol={market.collateral_symbol} className="h-5 w-5" /> {market.collateral_symbol} collateral.
-              LLTV is the maximum loan-to-value before the position becomes risky.
-            </p>
-          </div>
+    <div className="min-w-36">
+      <div className="flex items-center justify-between gap-3 text-xs font-black text-[#185229]">
+        <span>{pct(value)}</span>
+      </div>
+      <div className="mt-2 h-2.5 rounded-full bg-[#C8E4B0]">
+        <div
+          className="h-2.5 rounded-full bg-gradient-to-r from-[#39763D] via-[#57A053] to-[#3E73C4]"
+          style={{ width: `${utilization}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function MarketTable({ markets }: { markets: PurintaSnapshot['markets'] }) {
+  if (markets.length === 0) {
+    return (
+      <section className="rounded-[32px] border border-[#F0EDD4] bg-white/80 p-8 text-[#666666] shadow-[0_7px_0_#F0EDD4]">
+        Waiting for the first live market snapshot.
+      </section>
+    );
+  }
+
+  return (
+    <section className="rounded-[36px] border border-[#E5E1BE] bg-white/88 p-5 shadow-[0_9px_0_#D6D2B2,0_24px_60px_rgba(57,118,61,0.10)] sm:p-7">
+      <div className="flex flex-col gap-4 border-b border-[#F0EDD4] pb-6 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p className="text-sm font-black uppercase tracking-[0.24em] text-[#39763D]">Tracked markets</p>
+          <h2 className="mt-2 text-3xl font-black text-[#185229]">Market table</h2>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-[#666666]">
+            One row per collateral asset. This layout is easier to scan now and will scale as Purinta adds more markets.
+          </p>
         </div>
-        <div className="w-fit rounded-full border border-[#FEDBD8] bg-[#FFF5F4] px-3 py-1 text-xs font-black text-[#8C1C5F] shadow-[0_3px_0_#FEDBD8]">
-          <LabelWithTooltip
-            label={`LLTV ${pct(market.lltv)}`}
-            tooltip="LLTV is the highest loan-to-value allowed by this market. A 62.5% LLTV means each $100 of collateral can support up to $62.50 of debt before buffers."
-          />
+        <div className="rounded-full border border-[#C8E4B0] bg-[#E7F4EC] px-4 py-2 text-sm font-black text-[#185229] shadow-[0_4px_0_#C8E4B0]">
+          {markets.length} markets
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-3 text-sm lg:grid-cols-4">
-        <div className="rounded-2xl border border-[#F0EDD4] bg-white p-4">
-          <p className="font-semibold text-[#666666]">
-            <LabelWithTooltip
-              label="Borrowed now"
-              tooltip="USDC that has already been drawn by borrowers in this market."
-            />
-          </p>
-          <p className="mt-1 text-lg font-black text-[#185229]">${money(borrow, 2)}</p>
-        </div>
-        <div className="rounded-2xl border border-[#F0EDD4] bg-white p-4">
-          <p className="font-semibold text-[#666666]">
-            <LabelWithTooltip
-              label="Supplied liquidity"
-              tooltip="Total USDC supplied to this Morpho market. Borrowers can draw from this pool."
-            />
-          </p>
-          <p className="mt-1 text-lg font-black text-[#185229]">${money(supply, 2)}</p>
-        </div>
-        <div className="rounded-2xl border border-[#F0EDD4] bg-white p-4">
-          <p className="font-semibold text-[#666666]">
-            <LabelWithTooltip
-              label="Borrow APY"
-              tooltip="Annualized rate borrowers are paying to borrow USDC from this market right now."
-            />
-          </p>
-          <p className="mt-1 text-lg font-black text-[#39763D]">{pct(market.borrow_apy)}</p>
-        </div>
-        <div className="rounded-2xl border border-[#F0EDD4] bg-white p-4">
-          <p className="font-semibold text-[#666666]">
-            <LabelWithTooltip
-              label="Net supply APY"
-              tooltip="Annualized rate suppliers earn after market-level effects. This is not a guaranteed return."
-            />
-          </p>
-          <p className="mt-1 text-lg font-black text-[#3E73C4]">{pct(market.net_supply_apy)}</p>
-        </div>
+      <div className="mt-6 overflow-x-auto">
+        <table className="w-full min-w-[980px] border-separate border-spacing-0 text-left">
+          <thead>
+            <tr className="text-xs font-black uppercase tracking-[0.16em] text-[#39763D]">
+              <th className="rounded-l-2xl bg-[#FDFBF1] px-4 py-3">Market</th>
+              <th className="bg-[#FDFBF1] px-4 py-3">
+                <LabelWithTooltip
+                  label="Borrowed"
+                  tooltip="USDC that has already been drawn by borrowers in this market."
+                />
+              </th>
+              <th className="bg-[#FDFBF1] px-4 py-3">
+                <LabelWithTooltip label="Supply" tooltip="Total USDC supplied to this Morpho market." />
+              </th>
+              <th className="bg-[#FDFBF1] px-4 py-3">
+                <LabelWithTooltip label="Utilization" tooltip="Borrowed USDC divided by supplied USDC." />
+              </th>
+              <th className="bg-[#FDFBF1] px-4 py-3">
+                <LabelWithTooltip label="Borrow APY" tooltip="Annualized rate borrowers are paying right now." />
+              </th>
+              <th className="bg-[#FDFBF1] px-4 py-3">
+                <LabelWithTooltip
+                  label="Net supply APY"
+                  tooltip="Annualized rate suppliers earn after market-level effects. Not guaranteed."
+                />
+              </th>
+              <th className="bg-[#FDFBF1] px-4 py-3">
+                <LabelWithTooltip
+                  label="LLTV"
+                  tooltip="Maximum loan-to-value allowed by this market before liquidation risk rises."
+                />
+              </th>
+              <th className="rounded-r-2xl bg-[#FDFBF1] px-4 py-3">Links</th>
+            </tr>
+          </thead>
+          <tbody>
+            {markets.map((market) => (
+              <tr key={market.id} className="align-middle">
+                <td className="border-b border-[#F0EDD4] px-4 py-5">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[#C8E4B0] bg-[#E7F4EC] shadow-[0_3px_0_#C8E4B0]">
+                      <TokenLogo symbol={market.collateral_symbol} className="h-8 w-8" />
+                    </div>
+                    <div>
+                      <p className="text-base font-black text-[#185229]">{market.name}</p>
+                      <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-[#666666]">
+                        Borrow <TokenLogo symbol="USDC" className="h-4 w-4" /> USDC with {market.collateral_symbol}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+                <td className="border-b border-[#F0EDD4] px-4 py-5 font-black text-[#185229]">
+                  ${money(market.borrow_usdc, 2)}
+                </td>
+                <td className="border-b border-[#F0EDD4] px-4 py-5 font-black text-[#185229]">
+                  ${money(market.supply_usdc, 2)}
+                </td>
+                <td className="border-b border-[#F0EDD4] px-4 py-5">
+                  <UtilizationBar value={market.utilization} />
+                </td>
+                <td className="border-b border-[#F0EDD4] px-4 py-5 font-black text-[#39763D]">
+                  {pct(market.borrow_apy)}
+                </td>
+                <td className="border-b border-[#F0EDD4] px-4 py-5 font-black text-[#3E73C4]">
+                  {pct(market.net_supply_apy)}
+                </td>
+                <td className="border-b border-[#F0EDD4] px-4 py-5">
+                  <span className="rounded-full border border-[#FEDBD8] bg-[#FFF5F4] px-3 py-1 text-xs font-black text-[#8C1C5F]">
+                    {pct(market.lltv)}
+                  </span>
+                </td>
+                <td className="border-b border-[#F0EDD4] px-4 py-5">
+                  <div className="flex flex-col gap-2 text-sm font-semibold text-[#39763D]">
+                    <a
+                      className="inline-flex items-center gap-1 hover:text-[#185229]"
+                      href={`https://app.morpho.org/market?id=${market.id}&network=mainnet`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Morpho <ArrowUpRight className="h-3 w-3" />
+                    </a>
+                    <a
+                      className="inline-flex items-center gap-1 hover:text-[#185229]"
+                      href={`https://etherscan.io/token/${market.collateral_address}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Token {shortAddress(market.collateral_address)} <ArrowUpRight className="h-3 w-3" />
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      <div className="mt-6 rounded-2xl border border-[#C8E4B0] bg-[#E7F4EC] p-4">
-        <div className="flex items-center justify-between text-sm">
-          <span className="font-black text-[#185229]">
-            <LabelWithTooltip
-              label="Utilization"
-              tooltip="Borrowed USDC divided by supplied USDC. Higher utilization can mean less available liquidity and higher rates."
-            />
-          </span>
-          <span className="font-black text-[#185229]">{pct(market.utilization)}</span>
-        </div>
-        <div className="mt-3 h-3 rounded-full bg-[#C8E4B0]">
-          <div
-            className="h-3 rounded-full bg-gradient-to-r from-[#39763D] via-[#57A053] to-[#3E73C4]"
-            style={{ width: `${utilization}%` }}
-          />
-        </div>
-        <p className="mt-3 text-xs leading-5 text-[#498746]">
-          Utilization means how much of the supplied USDC is currently borrowed. Higher utilization usually means higher
-          rates and less available liquidity.
-        </p>
+      <div className="mt-6 grid gap-4 rounded-[28px] border border-[#C8E4B0] bg-[#E7F4EC] p-5 sm:grid-cols-3">
+        <MiniMetric
+          label="How to read utilization"
+          value="Borrowed ÷ supplied"
+          tooltip="A quick liquidity pressure signal. Higher utilization means less idle USDC."
+        />
+        <MiniMetric
+          label="How to read LLTV"
+          value="Risk limit"
+          tooltip="The maximum market loan-to-value. It is not a recommendation to borrow up to that level."
+        />
+        <MiniMetric
+          label="How to read APY"
+          value="Live annualized rate"
+          tooltip="APYs move as market supply and borrow demand change."
+        />
       </div>
-
-      <div className="mt-5 flex flex-col gap-2 text-sm text-[#39763D] sm:flex-row sm:flex-wrap">
-        <a
-          className="inline-flex items-center gap-1 rounded-full border border-[#C8E4B0] bg-white px-3 py-1.5 font-semibold shadow-[0_3px_0_#C8E4B0] hover:bg-[#E7F4EC]"
-          href={`https://etherscan.io/token/${market.collateral_address}`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          <TokenLogo symbol={market.collateral_symbol} className="h-5 w-5" /> {market.collateral_symbol} token{' '}
-          {shortAddress(market.collateral_address)} <ArrowUpRight className="h-3 w-3" />
-        </a>
-        <a
-          className="inline-flex items-center gap-1 rounded-full border border-[#C8E4B0] bg-white px-3 py-1.5 font-semibold shadow-[0_3px_0_#C8E4B0] hover:bg-[#E7F4EC]"
-          href={`https://app.morpho.org/market?id=${market.id}&network=mainnet`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          Open Morpho market <ArrowUpRight className="h-3 w-3" />
-        </a>
-      </div>
-    </article>
+    </section>
   );
 }
 
@@ -297,7 +351,7 @@ export default function Home({ snapshot: initialSnapshot }: { snapshot: PurintaS
       }}
     >
       <div className="pointer-events-none fixed inset-x-0 top-0 h-56 bg-gradient-to-b from-[#F1FCCB]/70 to-transparent" />
-      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-5 sm:gap-8 sm:px-6 sm:py-8 lg:px-8">
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 py-8 sm:gap-12 sm:px-6 sm:py-12 lg:px-8">
         <header className="rounded-[36px] border border-[#E5E1BE] bg-[#FCFBF5]/90 p-5 shadow-[0_10px_0_#D6D2B2,0_30px_70px_rgba(57,118,61,0.12)] backdrop-blur sm:p-8">
           <div className="flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between">
             <div className="max-w-3xl">
@@ -329,7 +383,7 @@ export default function Home({ snapshot: initialSnapshot }: { snapshot: PurintaS
           </div>
         </header>
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard
             label="Borrowed now"
             value={`$${money(snapshot.total_borrow_usdc, 2)}`}
@@ -364,18 +418,10 @@ export default function Home({ snapshot: initialSnapshot }: { snapshot: PurintaS
           />
         </section>
 
-        <section className="grid gap-4 lg:grid-cols-[1.25fr_0.75fr]">
-          <div className="grid gap-4">
-            {snapshot.markets.length === 0 ? (
-              <section className="rounded-[28px] border border-[#F0EDD4] bg-white/80 p-6 text-[#666666] shadow-[0_7px_0_#F0EDD4]">
-                Waiting for the first live market snapshot.
-              </section>
-            ) : (
-              snapshot.markets.map((market) => <MarketCard key={market.id} market={market} />)
-            )}
-          </div>
+        <section className="space-y-10">
+          <MarketTable markets={snapshot.markets} />
 
-          <aside className="flex flex-col gap-4">
+          <aside className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr_0.9fr]">
             <section className="rounded-[28px] border border-[#F0EDD4] bg-white/85 p-5 shadow-[0_7px_0_#F0EDD4]">
               <div className="flex items-center gap-3 text-[#185229]">
                 <ShieldCheck className="h-5 w-5" />
