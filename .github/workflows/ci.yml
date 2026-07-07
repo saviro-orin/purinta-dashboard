@@ -5,141 +5,17 @@ on:
     branches: [main]
   pull_request:
 
-# Cancel superseded runs on the same ref.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Least privilege: this workflow only needs to read the repo.
 permissions:
   contents: read
 
-env:
-  MIX_ENV: test
-  # Erlang, Elixir, and Node versions come from `mise.toml` (installed by
-  # mise-action below), so local dev and CI stay in lockstep.
-
 jobs:
-  build:
-    name: Compile · lint · test · dialyzer
+  verify:
+    name: Verify Bun dashboard
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        # Pinned inline: GitHub Actions doesn't allow the `env` context in a
-        # service `image:`. Postgres isn't a mise runtime, so it's the one
-        # version CI pins on its own.
-        image: postgres:18-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: purinta_dashboard_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    steps:
-      # Actions are pinned to commit SHAs (GitHub's supply-chain
-      # recommendation). The trailing comment is the human-readable tag;
-      # let Dependabot bump both together.
-      - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-        with:
-          persist-credentials: false
-
-      # Installs Erlang, Elixir, and Node from mise.toml — the same file
-      # developers use locally. `cache: true` caches the toolchain so the
-      # one-time Erlang source compile doesn't repeat on every run.
-      - name: Set up Erlang / Elixir / Node (mise)
-        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
-        with:
-          cache: true
-
-      - name: Install hex + rebar
-        run: |
-          mix local.hex --force
-          mix local.rebar --force
-
-      - name: Cache npm
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-${{ hashFiles('assets/package-lock.json') }}
-          restore-keys: ${{ runner.os }}-npm-
-
-      - name: Cache deps and _build
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: |
-            deps
-            _build
-          key: ${{ runner.os }}-mix-${{ hashFiles('mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-
-
-      - name: Cache dialyzer PLTs
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: priv/plts
-          key: ${{ runner.os }}-plt-${{ hashFiles('mix.lock') }}
-          restore-keys: ${{ runner.os }}-plt-
-
-      - name: Install Elixir deps
-        run: mix deps.get
-
-      - name: Install JS deps
-        run: npm ci
-        working-directory: assets
-
-      - name: Compile (warnings as errors)
-        run: mix compile --warnings-as-errors
-
-      - name: Check formatting
-        run: mix format --check-formatted
-
-      - name: Check for unused deps
-        run: mix deps.unlock --check-unused
-
-      - name: Lint (credo + biome)
-        run: mix lint
-
-      - name: i18n check
-        run: mix i18n.check
-
-      - name: Test
-        run: mix test --cover
-
-      - name: Dialyzer
-        run: mix dialyzer
-
-  e2e:
-    name: E2E (Playwright)
-    runs-on: ubuntu-latest
-
-    # The Playwright suite drives a real server, so it runs in :dev (the env
-    # that exposes /dev/e2e/users, the Swoosh mailbox JSON, and port 4000) —
-    # not :test. Override the workflow-level MIX_ENV=test for this job only.
-    env:
-      MIX_ENV: dev
-
-    services:
-      postgres:
-        image: postgres:18-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          # E2E runs against the dev database (see MIX_ENV above).
-          POSTGRES_DB: purinta_dashboard_dev
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
       - name: Checkout
@@ -147,96 +23,16 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up Erlang / Elixir / Node (mise)
-        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          cache: true
+          bun-version: 1.3.14
 
-      - name: Install hex + rebar
-        run: |
-          mix local.hex --force
-          mix local.rebar --force
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
-      - name: Cache npm
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-${{ hashFiles('assets/package-lock.json') }}
-          restore-keys: ${{ runner.os }}-npm-
+      - name: Verify
+        run: bun run verify
 
-      # Keyed on MIX_ENV so the dev build artefacts don't clobber the build
-      # job's test PLT/_build cache (different env, different compiled output).
-      - name: Cache deps and _build
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: |
-            deps
-            _build
-          key: ${{ runner.os }}-mix-dev-${{ hashFiles('mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-dev-
-
-      - name: Install Elixir deps
-        run: mix deps.get
-
-      - name: Install JS deps
-        run: npm ci
-        working-directory: assets
-
-      - name: Cache Playwright browsers
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('assets/package-lock.json') }}
-          restore-keys: ${{ runner.os }}-playwright-
-
-      - name: Install Playwright browser (chromium + system deps)
-        run: npx playwright install --with-deps chromium
-        working-directory: assets
-
-      - name: Set up database
-        run: |
-          mix ecto.create
-          mix ecto.migrate
-
-      # Build the browser bundle and priv/ssr.js once, up front. The server
-      # then runs with watchers off (see DISABLE_WATCHERS below), so a request
-      # can never land mid-rebuild and trip Inertia's raise_on_ssr_failure.
-      - name: Build assets
-        run: |
-          mix assets.setup
-          mix assets.build
-
-      - name: Start Phoenix server
-        env:
-          DISABLE_WATCHERS: "true"
-        run: |
-          mix phx.server > /tmp/phx-server.log 2>&1 &
-          echo "Waiting for http://localhost:4000 to come up..."
-          for _ in $(seq 1 60); do
-            if curl -sSf http://localhost:4000/login > /dev/null 2>&1; then
-              echo "Server is up."
-              exit 0
-            fi
-            sleep 2
-          done
-          echo "::error::Phoenix server did not become ready within 120s"
-          cat /tmp/phx-server.log
-          exit 1
-
-      - name: Run Playwright tests
-        working-directory: assets
-        run: npm run e2e
-
-      - name: Dump server log on failure
-        if: failure()
-        run: cat /tmp/phx-server.log || true
-
-      - name: Upload Playwright report
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: playwright-report
-          path: |
-            assets/playwright-report/
-            assets/test-results/
-          retention-days: 7
+      - name: Build Docker image
+        run: docker build .

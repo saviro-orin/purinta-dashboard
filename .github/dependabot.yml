@@ -1,20 +1,8 @@
 version: 2
 updates:
-  # Elixir / Hex dependencies (mix.exs + mix.lock at repo root)
-  - package-ecosystem: mix
-    directory: "/"
-    schedule:
-      interval: weekly
-    open-pull-requests-limit: 10
-    groups:
-      mix-minor-and-patch:
-        update-types:
-          - minor
-          - patch
-
-  # JavaScript / npm dependencies (assets/package.json)
+  # JavaScript / Bun dependencies at the repo root.
   - package-ecosystem: npm
-    directory: "/assets"
+    directory: "/"
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
@@ -24,9 +12,19 @@ updates:
           - minor
           - patch
 
-  # GitHub Actions (.github/workflows). Actions are pinned to commit SHAs;
-  # this is what keeps those pins current — bumping the SHA and the
-  # human-readable tag comment together.
+  # Optional Envio HyperIndex sidecar dependencies.
+  - package-ecosystem: npm
+    directory: "/indexer"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      indexer-npm-minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  # GitHub Actions.
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
