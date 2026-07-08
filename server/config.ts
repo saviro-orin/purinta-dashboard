@@ -15,6 +15,7 @@ const envSchema = z.object({
   PURINTA_INDEXER_BATCH_BLOCKS: z.coerce.number().int().positive().default(10),
   PURINTA_INDEXER_MAX_BLOCKS_PER_RUN: z.coerce.number().int().positive().default(1_000),
   PURINTA_INDEXER_BLOCK_LAG: z.coerce.number().int().nonnegative().default(8),
+  PURINTA_INDEXER_NORMAL_LAG_BLOCKS: z.coerce.number().int().nonnegative().default(12),
   PURINTA_INDEXER_START_BLOCK: z.coerce.number().int().positive().default(25_149_499),
   NODE_ENV: z.string().default('development'),
 });

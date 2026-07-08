@@ -80,12 +80,50 @@ export function StatusPill({ status }: { status: string }) {
 
 /* Connection state, data freshness, and chain position in one line, shared by every page. */
 export function LiveStatusRow({ snapshot, status }: { snapshot: PurintaSnapshot; status: string }) {
+  const eventSync = snapshot.event_sync;
+  const eventSyncTone =
+    eventSync.status === 'live'
+      ? 'border-mint-line bg-mint text-ink'
+      : eventSync.status === 'syncing'
+        ? 'border-usdc-line bg-usdc-soft text-ink'
+        : 'border-blush-line bg-blush text-blush-ink';
+  const eventSyncLabel =
+    eventSync.status === 'live'
+      ? 'Events live'
+      : eventSync.status === 'syncing'
+        ? 'Events catching up'
+        : eventSync.status === 'error'
+          ? 'Events need attention'
+          : 'Events checking';
+
   return (
-    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
-      <StatusPill status={status} />
-      <span>Updated {formatTime(snapshot.fetched_at)}</span>
-      <span aria-hidden>·</span>
-      <span>Block {snapshot.block_number?.toLocaleString() ?? 'syncing'}</span>
+    <div className="flex flex-col items-start gap-1 text-sm text-muted sm:items-end">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:justify-end">
+        <StatusPill status={status} />
+        <span>Updated {formatTime(snapshot.fetched_at)}</span>
+        <span aria-hidden>·</span>
+        <span>Block {snapshot.block_number?.toLocaleString() ?? 'syncing'}</span>
+      </div>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            className={`inline-flex cursor-help items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leaf ${eventSyncTone}`}
+          >
+            <span
+              className={`h-2 w-2 rounded-full ${eventSync.status === 'syncing' ? 'animate-slow-pulse bg-usdc' : eventSync.status === 'live' ? 'bg-leaf' : 'bg-blush-ink'}`}
+              aria-hidden
+            />
+            {eventSyncLabel}
+            {eventSync.lag_blocks === null ? null : <span>{eventSync.lag_blocks.toLocaleString()} blocks behind</span>}
+          </button>
+        </TooltipTrigger>
+        <TooltipContent className="max-w-80 rounded-xl border border-mint-line bg-ink px-3 py-2 text-sm leading-5 text-cream">
+          {eventSync.message} A few blocks behind is normal because the indexer deliberately waits for recent blocks
+          before indexing them. Normal window: {eventSync.normal_lag_blocks} blocks. Last indexed:{' '}
+          {eventSync.last_indexed_block?.toLocaleString() ?? 'unknown'}.
+        </TooltipContent>
+      </Tooltip>
     </div>
   );
 }

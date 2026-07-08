@@ -14,6 +14,15 @@ const snapshot: PurintaSnapshot = {
   total_supply_usdc: '20',
   weighted_borrow_apy: '3.5',
   status: 'live',
+  event_sync: {
+    status: 'syncing',
+    latest_block_number: 123,
+    last_indexed_block: 100,
+    lag_blocks: 23,
+    normal_lag_blocks: 12,
+    message: 'Event indexer is 23 blocks behind Ethereum and still catching up.',
+    last_error: null,
+  },
   markets: [
     {
       id: 'market-1',
@@ -45,6 +54,7 @@ describe('Home page rendering', () => {
 
     expect(html).toContain('Purinta markets');
     expect(html).toContain('Borrowed now');
+    expect(html).toContain('Events catching up');
     expect(html).toContain('PEPE / USDC');
   });
 });

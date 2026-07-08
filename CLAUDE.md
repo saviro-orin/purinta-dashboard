@@ -11,6 +11,7 @@ Bun + Hono + SQLite + Vite React application for monitoring Purinta markets.
 - `server/event-indexer.ts` is the built-in Bun/SQLite on-chain event indexer. It starts from Purinta vault deployment block `25149499`, writes `morpho_events`, `market_registry`, `indexed_blocks`, and `indexer_state`, and must checkpoint after every batch.
 - `server/poller.ts` currently fetches live Morpho state, persists a `market_snapshots` row in SQLite, and broadcasts the payload. Treat Morpho API as a temporary live-state fallback while indexed history becomes canonical.
 - Keep the indexer public-RPC friendly: small `eth_getLogs` ranges, `PURINTA_INDEXER_DELAY_MS` between batches, `PURINTA_INDEXER_BLOCK_LAG` for reorg safety, and optional `ETHEREUM_RPC_FALLBACK_URL`.
+- The dashboard should show event sync status separately from live market polling. A few blocks behind is normal; when `lag_blocks > PURINTA_INDEXER_NORMAL_LAG_BLOCKS`, label events as catching up.
 - Keep the app mobile-first and visually close to Purinta: cream base, green/mint/blush panels, USDC-blue accents, rounded raised cards, and clear financial labels.
 - SQLite lives at `SQLITE_PATH`; Docker mounts `./data:/app/data`.
 - Do not expose secrets. RPC provider keys belong in `.env`/deployment secrets only.

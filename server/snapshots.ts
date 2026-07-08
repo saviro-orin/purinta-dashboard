@@ -1,4 +1,5 @@
 import type { Database } from 'bun:sqlite';
+import { classifyEventSync } from './event-indexer';
 import { MORPHO_BLUE, VAULT_ADDRESS } from './markets';
 import type { PurintaSnapshot } from './types';
 
@@ -13,6 +14,15 @@ export const EMPTY_SNAPSHOT: PurintaSnapshot = {
   weighted_borrow_apy: '0',
   markets: [],
   status: 'syncing',
+  event_sync: {
+    status: 'unknown',
+    latest_block_number: null,
+    last_indexed_block: null,
+    lag_blocks: null,
+    normal_lag_blocks: 12,
+    message: 'Waiting for first snapshot before measuring event sync lag.',
+    last_error: null,
+  },
 };
 
 export function latestSnapshot(db: Database): PurintaSnapshot {
@@ -20,8 +30,8 @@ export function latestSnapshot(db: Database): PurintaSnapshot {
     .query<{ payload: string }, []>('SELECT payload FROM market_snapshots ORDER BY fetched_at DESC LIMIT 1')
     .get();
 
-  if (!row) return EMPTY_SNAPSHOT;
-  return JSON.parse(row.payload) as PurintaSnapshot;
+  const snapshot = row ? (JSON.parse(row.payload) as PurintaSnapshot) : EMPTY_SNAPSHOT;
+  return { ...snapshot, event_sync: classifyEventSync(db, snapshot.block_number) };
 }
 
 export function saveSnapshot(db: Database, snapshot: PurintaSnapshot) {

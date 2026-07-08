@@ -38,6 +38,16 @@ export interface MarketHistory {
   points: MarketHistoryPoint[];
 }
 
+export interface EventSyncStatus {
+  status: 'live' | 'syncing' | 'error' | 'disabled' | 'unknown';
+  latest_block_number: number | null;
+  last_indexed_block: number | null;
+  lag_blocks: number | null;
+  normal_lag_blocks: number;
+  message: string;
+  last_error: string | null;
+}
+
 export interface PurintaSnapshot {
   fetched_at: string | null;
   block_number: number | null;
@@ -49,4 +59,5 @@ export interface PurintaSnapshot {
   weighted_borrow_apy: string;
   markets: PurintaMarket[];
   status: string;
+  event_sync: EventSyncStatus;
 }

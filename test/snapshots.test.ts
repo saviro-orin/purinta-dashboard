@@ -15,6 +15,15 @@ const snapshot: PurintaSnapshot = {
   weighted_borrow_apy: '3.5',
   markets: [],
   status: 'live',
+  event_sync: {
+    status: 'syncing',
+    latest_block_number: 123,
+    last_indexed_block: 25_149_498,
+    lag_blocks: null,
+    normal_lag_blocks: 12,
+    message: 'fixture',
+    last_error: null,
+  },
 };
 
 describe('snapshots', () => {
@@ -31,6 +40,11 @@ describe('snapshots', () => {
 
     saveSnapshot(db, snapshot);
 
-    expect(latestSnapshot(db)).toEqual(snapshot);
+    const latest = latestSnapshot(db);
+
+    expect(latest.status).toBe(snapshot.status);
+    expect(latest.block_number).toBe(snapshot.block_number);
+    expect(latest.event_sync.status).toBe('live');
+    expect(latest.event_sync.lag_blocks).toBe(0);
   });
 });

@@ -4,6 +4,7 @@ import { config } from './config';
 import { hexToInteger, rpc } from './ethereum';
 import { createLogger } from './logger';
 import { MORPHO_BLUE, PURINTA_MARKETS, VAULT_ADDRESS } from './markets';
+import type { EventSyncStatus } from './types';
 
 const INDEXER_NAME = 'morpho-events';
 const USDC_DECIMALS = 6;
@@ -136,6 +137,69 @@ function getState(db: Database): IndexerState {
   ).run(INDEXER_NAME, initialLastIndexedBlock(), now, 'initialized');
 
   return { last_indexed_block: initialLastIndexedBlock(), status: 'initialized', last_error: null };
+}
+
+function classifyEventSync(db: Database, latestBlockNumber: number | null): EventSyncStatus {
+  if (!config.PURINTA_INDEXER_ENABLED) {
+    return {
+      status: 'disabled',
+      latest_block_number: latestBlockNumber,
+      last_indexed_block: null,
+      lag_blocks: null,
+      normal_lag_blocks: config.PURINTA_INDEXER_NORMAL_LAG_BLOCKS,
+      message: 'Event indexer is disabled.',
+      last_error: null,
+    };
+  }
+
+  const state = getState(db);
+  const lagBlocks = latestBlockNumber === null ? null : Math.max(0, latestBlockNumber - state.last_indexed_block);
+
+  if (state.status === 'error') {
+    return {
+      status: 'error',
+      latest_block_number: latestBlockNumber,
+      last_indexed_block: state.last_indexed_block,
+      lag_blocks: lagBlocks,
+      normal_lag_blocks: config.PURINTA_INDEXER_NORMAL_LAG_BLOCKS,
+      message: 'Event indexing hit an RPC or app error. The dashboard will resume from the last indexed block.',
+      last_error: state.last_error,
+    };
+  }
+
+  if (lagBlocks === null) {
+    return {
+      status: 'unknown',
+      latest_block_number: latestBlockNumber,
+      last_indexed_block: state.last_indexed_block,
+      lag_blocks: null,
+      normal_lag_blocks: config.PURINTA_INDEXER_NORMAL_LAG_BLOCKS,
+      message: 'Waiting for latest Ethereum block height before measuring event sync lag.',
+      last_error: state.last_error,
+    };
+  }
+
+  if (lagBlocks <= config.PURINTA_INDEXER_NORMAL_LAG_BLOCKS) {
+    return {
+      status: 'live',
+      latest_block_number: latestBlockNumber,
+      last_indexed_block: state.last_indexed_block,
+      lag_blocks: lagBlocks,
+      normal_lag_blocks: config.PURINTA_INDEXER_NORMAL_LAG_BLOCKS,
+      message: `Event indexer is within the normal ${config.PURINTA_INDEXER_NORMAL_LAG_BLOCKS}-block lag window.`,
+      last_error: state.last_error,
+    };
+  }
+
+  return {
+    status: 'syncing',
+    latest_block_number: latestBlockNumber,
+    last_indexed_block: state.last_indexed_block,
+    lag_blocks: lagBlocks,
+    normal_lag_blocks: config.PURINTA_INDEXER_NORMAL_LAG_BLOCKS,
+    message: `Event indexer is ${lagBlocks.toLocaleString()} blocks behind Ethereum and still catching up.`,
+    last_error: state.last_error,
+  };
 }
 
 function setState(db: Database, lastIndexedBlock: number, status: string, lastError: string | null) {
@@ -462,4 +526,4 @@ function startEventIndexer(db: Database) {
   return () => clearInterval(interval);
 }
 
-export { getState as eventIndexerState, runIndexerOnce, startEventIndexer, usdcString };
+export { classifyEventSync, getState as eventIndexerState, runIndexerOnce, startEventIndexer, usdcString };

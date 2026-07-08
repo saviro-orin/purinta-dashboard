@@ -123,5 +123,14 @@ export async function fetchSnapshot(): Promise<PurintaSnapshot> {
     weighted_borrow_apy: decimalString(weightedBorrowApy(markets, totalBorrow)),
     markets,
     status: 'live',
+    event_sync: {
+      status: 'unknown',
+      latest_block_number: block.block_number,
+      last_indexed_block: null,
+      lag_blocks: null,
+      normal_lag_blocks: 12,
+      message: 'Waiting for local event indexer state.',
+      last_error: null,
+    },
   };
 }

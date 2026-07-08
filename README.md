@@ -19,6 +19,7 @@ Then open http://localhost:4301. One command runs both the API server (port 4300
 - Per-market borrow APY, net supply APY, utilization, and LLTV.
 - Per-market history charts from persisted snapshots.
 - Live connection status and the Ethereum block behind the current snapshot.
+- Event indexer sync status, including whether events are within the normal small block lag or still catching up.
 
 ## Data model
 
@@ -61,6 +62,7 @@ PURINTA_INDEXER_DELAY_MS=750
 PURINTA_INDEXER_BATCH_BLOCKS=10
 PURINTA_INDEXER_MAX_BLOCKS_PER_RUN=1000
 PURINTA_INDEXER_BLOCK_LAG=8
+PURINTA_INDEXER_NORMAL_LAG_BLOCKS=12
 ```
 
 Indexer settings:
@@ -70,6 +72,7 @@ Indexer settings:
 - `PURINTA_INDEXER_BATCH_BLOCKS`: block span per `eth_getLogs` call. Keep this small for free/public RPCs.
 - `PURINTA_INDEXER_MAX_BLOCKS_PER_RUN`: caps work per interval so the server remains responsive.
 - `PURINTA_INDEXER_BLOCK_LAG`: leaves a few blocks unindexed to reduce reorg risk.
+- `PURINTA_INDEXER_NORMAL_LAG_BLOCKS`: dashboard threshold for normal event lag. At or below this value is shown as normal; above it is shown as catching up.
 - `ETHEREUM_RPC_FALLBACK_URL`: optional second RPC endpoint used automatically if the primary fails.
 
 ## Production (Docker)

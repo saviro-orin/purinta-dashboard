@@ -17,6 +17,15 @@ function makeSnapshot(fetchedAt: string, borrow: string): PurintaSnapshot {
     total_supply_usdc: '100',
     weighted_borrow_apy: '1',
     status: 'live',
+    event_sync: {
+      status: 'live',
+      latest_block_number: 1,
+      last_indexed_block: 1,
+      lag_blocks: 0,
+      normal_lag_blocks: 12,
+      message: 'fixture',
+      last_error: null,
+    },
     markets: [
       {
         id: 'market-1',
