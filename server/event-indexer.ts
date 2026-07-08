@@ -373,7 +373,16 @@ function indexedMarketIds(db: Database) {
   return ids.length === 0 ? PURINTA_MARKETS.map((market) => market.id as Hex) : ids;
 }
 
-async function fetchLogs(db: Database, fromBlock: number, toBlock: number) {
+function sortLogs(entries: RpcLog[]) {
+  return entries.sort((left, right) => {
+    const leftBlock = hexToInteger(left.blockNumber) ?? 0;
+    const rightBlock = hexToInteger(right.blockNumber) ?? 0;
+    if (leftBlock !== rightBlock) return leftBlock - rightBlock;
+    return (hexToInteger(left.logIndex) ?? 0) - (hexToInteger(right.logIndex) ?? 0);
+  });
+}
+
+async function fetchLogsStrict(db: Database, fromBlock: number, toBlock: number) {
   const range = {
     fromBlock: `0x${fromBlock.toString(16)}`,
     toBlock: `0x${toBlock.toString(16)}`,
@@ -396,12 +405,28 @@ async function fetchLogs(db: Database, fromBlock: number, toBlock: number) {
     ]),
   ]);
 
-  return [...vaultLogs, ...marketLogs].sort((left, right) => {
-    const leftBlock = hexToInteger(left.blockNumber) ?? 0;
-    const rightBlock = hexToInteger(right.blockNumber) ?? 0;
-    if (leftBlock !== rightBlock) return leftBlock - rightBlock;
-    return (hexToInteger(left.logIndex) ?? 0) - (hexToInteger(right.logIndex) ?? 0);
-  });
+  return sortLogs([...vaultLogs, ...marketLogs]);
+}
+
+async function fetchLogs(db: Database, fromBlock: number, toBlock: number): Promise<RpcLog[]> {
+  try {
+    return await fetchLogsStrict(db, fromBlock, toBlock);
+  } catch (error) {
+    if (fromBlock >= toBlock) throw error;
+
+    const message = error instanceof Error ? error.message : String(error);
+    const midpoint = Math.floor((fromBlock + toBlock) / 2);
+    log.warn('splitting indexer range after RPC rejection', {
+      fromBlock,
+      toBlock,
+      leftToBlock: midpoint,
+      rightFromBlock: midpoint + 1,
+      error: message,
+    });
+    const left = await fetchLogs(db, fromBlock, midpoint);
+    const right = await fetchLogs(db, midpoint + 1, toBlock);
+    return sortLogs([...left, ...right]);
+  }
 }
 
 async function fetchBlockTimestamp(blockNumber: number) {

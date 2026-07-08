@@ -52,15 +52,15 @@ Copy `.env.example` to `.env` and adjust as needed. Defaults use public/free RPC
 PORT=4300
 SQLITE_PATH=./data/purinta-dashboard.sqlite3
 PURINTA_POLL_INTERVAL_MS=30000
-ETHEREUM_RPC_URL=https://eth-mainnet.public.blastapi.io
-ETHEREUM_RPC_FALLBACK_URL=https://eth.drpc.org
+ETHEREUM_RPC_URL=https://eth.drpc.org
+ETHEREUM_RPC_FALLBACK_URL=https://eth-mainnet.public.blastapi.io
 MORPHO_GRAPHQL_URL=https://blue-api.morpho.org/graphql
 PURINTA_INDEXER_ENABLED=true
 PURINTA_INDEXER_START_BLOCK=25149499
 PURINTA_INDEXER_INTERVAL_MS=60000
-PURINTA_INDEXER_DELAY_MS=750
-PURINTA_INDEXER_BATCH_BLOCKS=10
-PURINTA_INDEXER_MAX_BLOCKS_PER_RUN=1000
+PURINTA_INDEXER_DELAY_MS=250
+PURINTA_INDEXER_BATCH_BLOCKS=25
+PURINTA_INDEXER_MAX_BLOCKS_PER_RUN=2000
 PURINTA_INDEXER_BLOCK_LAG=8
 PURINTA_INDEXER_NORMAL_LAG_BLOCKS=12
 ```
@@ -69,7 +69,7 @@ Indexer settings:
 
 - `PURINTA_INDEXER_START_BLOCK`: Purinta vault deployment block.
 - `PURINTA_INDEXER_DELAY_MS`: delay between `eth_getLogs` batches to avoid public RPC throttling.
-- `PURINTA_INDEXER_BATCH_BLOCKS`: block span per `eth_getLogs` call. Keep this small for free/public RPCs.
+- `PURINTA_INDEXER_BATCH_BLOCKS`: preferred block span per `eth_getLogs` call. The indexer adaptively splits a range if an RPC rejects or times out.
 - `PURINTA_INDEXER_MAX_BLOCKS_PER_RUN`: caps work per interval so the server remains responsive.
 - `PURINTA_INDEXER_BLOCK_LAG`: leaves a few blocks unindexed to reduce reorg risk.
 - `PURINTA_INDEXER_NORMAL_LAG_BLOCKS`: dashboard threshold for normal event lag. At or below this value is shown as normal; above it is shown as catching up.
