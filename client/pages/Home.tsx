@@ -63,7 +63,7 @@ function MarketCard({ market }: { market: PurintaMarket }) {
       <div className="mt-5">
         <div className="flex items-center justify-between gap-3">
           <MetricLabel label="Utilization" tooltip="Borrowed USDC divided by supplied USDC." />
-          <span className="text-sm font-black text-ink">{pct(market.utilization)}</span>
+          <span className="text-sm font-black text-ink">{pct(market.utilization, 1)}</span>
         </div>
         <div className="mt-2">
           <UtilizationBar value={numberValue(market.utilization)} />
@@ -107,6 +107,13 @@ export default function Home({ snapshot: initialSnapshot }: { snapshot: PurintaS
     return { totalBorrow, totalSupply, utilization, availableLiquidity };
   }, [snapshot]);
 
+  /* Derive the collateral list from the snapshot so the tagline never drifts
+     from the markets actually tracked in server/markets.ts. */
+  const collateralSummary = useMemo(() => {
+    const symbols = snapshot.markets.map((market) => market.collateral_symbol);
+    return symbols.length === 0 ? null : new Intl.ListFormat('en-US').format(symbols);
+  }, [snapshot.markets]);
+
   return (
     <main className="min-h-screen bg-cream text-ink">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-12">
@@ -114,7 +121,9 @@ export default function Home({ snapshot: initialSnapshot }: { snapshot: PurintaS
           <div>
             <h1 className="text-3xl font-black tracking-tight text-ink sm:text-4xl">Purinta markets</h1>
             <p className="mt-2 max-w-xl text-base leading-6 text-muted">
-              Live USDC borrowing against PEPE and SPX collateral on Morpho.
+              {collateralSummary
+                ? `Live USDC borrowing against ${collateralSummary} collateral on Morpho.`
+                : 'Live USDC borrowing on Morpho.'}
             </p>
           </div>
           <LiveStatusRow snapshot={snapshot} status={status} />
@@ -182,7 +191,10 @@ export default function Home({ snapshot: initialSnapshot }: { snapshot: PurintaS
         </section>
 
         <footer className="flex flex-col gap-2 border-t border-line pt-5 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
-          <p>Data from the Morpho Blue API, refreshed about every 30 seconds.</p>
+          <p>
+            Live rates and balances from the Morpho API, refreshed about every 30 seconds. On-chain events are indexed
+            directly from Ethereum.
+          </p>
           <p className="flex flex-wrap gap-x-4 gap-y-1 font-semibold text-leaf">
             <a
               className="inline-flex items-center gap-1 hover:text-ink"

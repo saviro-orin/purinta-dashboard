@@ -65,36 +65,69 @@ export function StatusPill({ status }: { status: string }) {
   const live = status === 'connected';
   const waiting = status === 'connecting';
   const label = live ? 'Live' : waiting ? 'Connecting' : 'Offline';
+  /* Connecting is a normal transient state; only a dropped connection reads as a warning. */
+  const tone = live
+    ? 'border-mint-line bg-mint text-ink'
+    : waiting
+      ? 'border-line bg-white text-muted'
+      : 'border-blush-line bg-blush text-blush-ink';
+  const dot = live ? 'animate-slow-pulse bg-leaf' : waiting ? 'animate-slow-pulse bg-muted' : 'bg-blush-ink';
 
   return (
-    <span
-      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${
-        live ? 'border-mint-line bg-mint text-ink' : 'border-blush-line bg-blush text-blush-ink'
-      }`}
-    >
-      <span className={`h-2 w-2 rounded-full ${live ? 'animate-slow-pulse bg-leaf' : 'bg-blush-ink'}`} aria-hidden />
+    <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${tone}`}>
+      <span className={`h-2 w-2 rounded-full ${dot}`} aria-hidden />
       {label}
     </span>
   );
 }
 
+/* Only surface the lag count once the indexer is meaningfully behind:
+   ~1 hour of Ethereum blocks (12s each). Below that, "catching up" says enough. */
+const LAG_DISPLAY_THRESHOLD_BLOCKS = 300;
+
+const EVENT_SYNC_TONE: Record<PurintaSnapshot['event_sync']['status'], string> = {
+  live: 'border-mint-line bg-mint text-ink',
+  syncing: 'border-usdc-line bg-usdc-soft text-ink',
+  error: 'border-blush-line bg-blush text-blush-ink',
+  /* Unknown and disabled are neutral facts, not warnings. */
+  disabled: 'border-line bg-white text-muted',
+  unknown: 'border-line bg-white text-muted',
+};
+
+const EVENT_SYNC_LABEL: Record<PurintaSnapshot['event_sync']['status'], string> = {
+  live: 'Events live',
+  syncing: 'Events catching up',
+  error: 'Events need attention',
+  disabled: 'Events off',
+  unknown: 'Events checking',
+};
+
+const EVENT_SYNC_DOT: Record<PurintaSnapshot['event_sync']['status'], string> = {
+  live: 'bg-leaf',
+  syncing: 'animate-slow-pulse bg-usdc',
+  error: 'bg-blush-ink',
+  disabled: 'bg-muted',
+  unknown: 'animate-slow-pulse bg-muted',
+};
+
 /* Connection state, data freshness, and chain position in one line, shared by every page. */
 export function LiveStatusRow({ snapshot, status }: { snapshot: PurintaSnapshot; status: string }) {
   const eventSync = snapshot.event_sync;
-  const eventSyncTone =
-    eventSync.status === 'live'
-      ? 'border-mint-line bg-mint text-ink'
-      : eventSync.status === 'syncing'
-        ? 'border-usdc-line bg-usdc-soft text-ink'
-        : 'border-blush-line bg-blush text-blush-ink';
-  const eventSyncLabel =
-    eventSync.status === 'live'
-      ? 'Events live'
-      : eventSync.status === 'syncing'
-        ? 'Events catching up'
-        : eventSync.status === 'error'
-          ? 'Events need attention'
-          : 'Events checking';
+  const farBehind =
+    eventSync.status === 'syncing' &&
+    eventSync.lag_blocks !== null &&
+    eventSync.lag_blocks > LAG_DISPLAY_THRESHOLD_BLOCKS;
+  /* Details only when something needs explaining; a healthy pill speaks for itself. */
+  const detail = eventSync.status === 'error' || farBehind ? eventSync.message : null;
+
+  const pillClass = `inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${EVENT_SYNC_TONE[eventSync.status]}`;
+  const pillContent = (
+    <>
+      <span className={`h-2 w-2 rounded-full ${EVENT_SYNC_DOT[eventSync.status]}`} aria-hidden />
+      {EVENT_SYNC_LABEL[eventSync.status]}
+      {farBehind ? <span>{eventSync.lag_blocks?.toLocaleString()} blocks behind</span> : null}
+    </>
+  );
 
   return (
     <div className="flex flex-col items-start gap-1 text-sm text-muted sm:items-end">
@@ -104,26 +137,23 @@ export function LiveStatusRow({ snapshot, status }: { snapshot: PurintaSnapshot;
         <span aria-hidden>·</span>
         <span>Block {snapshot.block_number?.toLocaleString() ?? 'syncing'}</span>
       </div>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            className={`inline-flex cursor-help items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leaf ${eventSyncTone}`}
-          >
-            <span
-              className={`h-2 w-2 rounded-full ${eventSync.status === 'syncing' ? 'animate-slow-pulse bg-usdc' : eventSync.status === 'live' ? 'bg-leaf' : 'bg-blush-ink'}`}
-              aria-hidden
-            />
-            {eventSyncLabel}
-            {eventSync.lag_blocks === null ? null : <span>{eventSync.lag_blocks.toLocaleString()} blocks behind</span>}
-          </button>
-        </TooltipTrigger>
-        <TooltipContent className="max-w-80 rounded-xl border border-mint-line bg-ink px-3 py-2 text-sm leading-5 text-cream">
-          {eventSync.message} A few blocks behind is normal because the indexer deliberately waits for recent blocks
-          before indexing them. Normal window: {eventSync.normal_lag_blocks} blocks. Last indexed:{' '}
-          {eventSync.last_indexed_block?.toLocaleString() ?? 'unknown'}.
-        </TooltipContent>
-      </Tooltip>
+      {detail === null ? (
+        <span className={pillClass}>{pillContent}</span>
+      ) : (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              className={`cursor-help focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leaf ${pillClass}`}
+            >
+              {pillContent}
+            </button>
+          </TooltipTrigger>
+          <TooltipContent className="max-w-80 rounded-xl border border-mint-line bg-ink px-3 py-2 text-sm leading-5 text-cream">
+            {detail}
+          </TooltipContent>
+        </Tooltip>
+      )}
     </div>
   );
 }

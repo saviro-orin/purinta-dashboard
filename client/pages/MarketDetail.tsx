@@ -333,7 +333,7 @@ export default function MarketDetail({
                 </ResponsiveContainer>
               </ChartCard>
 
-              <ChartCard title="Utilization" current={pct(market.utilization)}>
+              <ChartCard title="Utilization" current={pct(market.utilization, 1)}>
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={points} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
                     <CartesianGrid vertical={false} stroke={GRID_COLOR} strokeWidth={1} />
@@ -405,23 +405,26 @@ export default function MarketDetail({
           )}
         </section>
 
-        <footer className="flex flex-wrap gap-x-5 gap-y-2 border-t border-line pt-5 text-sm font-semibold text-leaf">
-          <a
-            className="inline-flex items-center gap-1 hover:text-ink"
-            href={`https://app.morpho.org/market?id=${market.id}&network=mainnet`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            View on Morpho <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
-          </a>
-          <a
-            className="inline-flex items-center gap-1 hover:text-ink"
-            href={`https://etherscan.io/token/${market.collateral_address}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {market.collateral_symbol} token <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
-          </a>
+        <footer className="flex flex-col gap-2 border-t border-line pt-5 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
+          <p>Live rates and balances from the Morpho API, refreshed about every 30 seconds.</p>
+          <p className="flex flex-wrap gap-x-4 gap-y-1 font-semibold text-leaf">
+            <a
+              className="inline-flex items-center gap-1 hover:text-ink"
+              href={`https://app.morpho.org/market?id=${market.id}&network=mainnet`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              View on Morpho <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
+            </a>
+            <a
+              className="inline-flex items-center gap-1 hover:text-ink"
+              href={`https://etherscan.io/token/${market.collateral_address}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {market.collateral_symbol} token <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
+            </a>
+          </p>
         </footer>
       </div>
     </main>
