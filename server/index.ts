@@ -4,11 +4,15 @@ import { Hono } from 'hono';
 import { serveStatic } from 'hono/bun';
 import { config } from './config';
 import { db } from './db';
+import { eventIndexerState, startEventIndexer } from './event-indexer';
 import { isHistoryRange, marketHistory } from './history';
+import { createLogger } from './logger';
 import { runMigrations } from './migrations';
 import { startPoller } from './poller';
 import { latestSnapshot } from './snapshots';
 import { primeSnapshot, registerSocket, unregisterSocket, type WebSocketData } from './websocket';
+
+const log = createLogger('server');
 
 runMigrations(db);
 primeSnapshot(latestSnapshot(db));
@@ -17,7 +21,7 @@ const app = new Hono();
 const clientRoot = './dist/client';
 const indexPath = join(clientRoot, 'index.html');
 
-app.get('/health', (c) => c.json({ status: 'ok' }));
+app.get('/health', (c) => c.json({ status: 'ok', indexer: eventIndexerState(db) }));
 app.get('/api/snapshot', (c) => c.json(latestSnapshot(db)));
 app.get('/api/markets/:id/history', (c) => {
   const range = c.req.query('range') ?? '24h';
@@ -39,6 +43,7 @@ app.get('*', (c) => {
   return c.html(readFileSync(indexPath, 'utf8'));
 });
 
+startEventIndexer(db);
 startPoller(db);
 
 const server = Bun.serve<WebSocketData>({
@@ -69,4 +74,4 @@ const server = Bun.serve<WebSocketData>({
   },
 });
 
-console.log(`Purinta dashboard listening on http://0.0.0.0:${server.port}`);
+log.info('Purinta dashboard listening', { port: server.port });
