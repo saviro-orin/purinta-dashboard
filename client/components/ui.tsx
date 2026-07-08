@@ -95,11 +95,11 @@ const EVENT_SYNC_TONE: Record<PurintaSnapshot['event_sync']['status'], string> =
 };
 
 const EVENT_SYNC_LABEL: Record<PurintaSnapshot['event_sync']['status'], string> = {
-  live: 'Events live',
-  syncing: 'Events catching up',
-  error: 'Events need attention',
-  disabled: 'Events off',
-  unknown: 'Events checking',
+  live: 'Event ledger live',
+  syncing: 'Event ledger catching up',
+  error: 'Event ledger needs attention',
+  disabled: 'Event ledger off',
+  unknown: 'Event ledger checking',
 };
 
 const EVENT_SYNC_DOT: Record<PurintaSnapshot['event_sync']['status'], string> = {

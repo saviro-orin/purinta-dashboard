@@ -23,15 +23,20 @@ Then open http://localhost:4301. One command runs both the API server (port 4300
 
 ## Data model
 
-The dashboard now has a built-in Bun/SQLite event indexer. It starts from the Purinta vault deployment block (`25149499`) and indexes Morpho Blue / MetaMorpho events into SQLite so history can be rebuilt from scratch without a third-party indexer account.
+The dashboard currently has two data layers. They are intentionally separate so the UI can stay useful while the indexed ledger becomes complete.
+
+| Layer | What it powers today | Why it exists |
+| --- | --- | --- |
+| Current market snapshot | The headline totals, per-market balances, utilization, and APYs shown in the dashboard | Keeps the public dashboard fresh while the event ledger catches up and while event-derived calculations are completed |
+| Event ledger | The event sync badge, checkpointing, and the durable history foundation in SQLite | Provides a rebuildable record of market activity from the Purinta vault deployment block forward |
 
 Current data flow:
 
-1. `server/event-indexer.ts` indexes on-chain events via Ethereum JSON-RPC and stores checkpoints in `indexer_state`.
-2. `server/poller.ts` still fetches live market APY/state snapshots and stores them in `market_snapshots` for the current dashboard view.
+1. `server/event-indexer.ts` records Morpho Blue and MetaMorpho events into SQLite and stores checkpoints in `indexer_state`.
+2. `server/poller.ts` refreshes the current market snapshot about every 30 seconds and stores it in `market_snapshots`.
 3. `server/history.ts` serves chart history from SQLite snapshots.
 
-The Morpho API remains a live-state fallback while the indexed event history becomes the source of truth.
+The intended direction is for the event ledger to become the canonical source for more of the dashboard. Until that transition is complete, the current snapshot layer is a temporary live-state bridge for fields such as APY, utilization, and balances. The UI labels these as a current market snapshot, while the event badge separately shows whether the durable event ledger is caught up.
 
 ## Commands
 

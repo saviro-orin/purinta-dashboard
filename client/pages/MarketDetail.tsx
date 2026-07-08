@@ -405,9 +405,18 @@ export default function MarketDetail({
           )}
         </section>
 
-        <footer className="flex flex-col gap-2 border-t border-line pt-5 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
-          <p>Live rates and balances from the Morpho API, refreshed about every 30 seconds.</p>
-          <p className="flex flex-wrap gap-x-4 gap-y-1 font-semibold text-leaf">
+        <footer className="flex flex-col gap-3 border-t border-line pt-5 text-sm text-muted sm:flex-row sm:items-start sm:justify-between">
+          <div className="max-w-2xl space-y-1">
+            <p>
+              <strong className="font-black text-ink">Current market snapshot:</strong> balances, rates, and utilization
+              refresh about every 30 seconds.
+            </p>
+            <p>
+              <strong className="font-black text-ink">Event ledger:</strong> market activity is indexed separately for a
+              durable history and sync status.
+            </p>
+          </div>
+          <p className="flex flex-wrap gap-x-4 gap-y-1 font-semibold text-leaf sm:justify-end">
             <a
               className="inline-flex items-center gap-1 hover:text-ink"
               href={`https://app.morpho.org/market?id=${market.id}&network=mainnet`}

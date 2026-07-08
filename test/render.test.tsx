@@ -54,7 +54,9 @@ describe('Home page rendering', () => {
 
     expect(html).toContain('Purinta markets');
     expect(html).toContain('Borrowed now');
-    expect(html).toContain('Events catching up');
+    expect(html).toContain('Event ledger catching up');
+    expect(html).toContain('Current market snapshot');
+    expect(html).toContain('Event ledger');
     expect(html).toContain('PEPE / USDC');
   });
 });
