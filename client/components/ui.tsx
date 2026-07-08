@@ -1,33 +1,52 @@
-import { CircleHelp } from 'lucide-react';
 import { formatTime } from '../lib/format';
 import type { PurintaSnapshot } from '../types';
 import { Tooltip, TooltipContent, TooltipTrigger } from './Tooltip';
 
-export function InfoTooltip({ label, children }: { label: string; children: string }) {
+function ExplainerContent({ children }: { children: string }) {
+  return (
+    <TooltipContent className="max-w-72 rounded-xl border border-mint-line bg-ink px-3 py-2 text-sm leading-5 text-cream">
+      {children}
+    </TooltipContent>
+  );
+}
+
+/* Labels explain themselves: when a tooltip exists, the label itself is the
+   trigger (dotted underline) instead of a separate `?` icon crowding the data. */
+export function MetricLabel({ label, tooltip }: { label: string; tooltip?: string }) {
+  if (!tooltip) {
+    return <span className="text-sm font-medium text-muted">{label}</span>;
+  }
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <button
           type="button"
-          aria-label={label}
-          className="inline-flex h-5 w-5 items-center justify-center rounded-full text-leaf hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leaf"
+          className="cursor-help rounded-sm text-sm font-medium text-muted underline decoration-muted/40 decoration-dotted underline-offset-4 hover:decoration-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leaf"
         >
-          <CircleHelp className="h-4 w-4" aria-hidden />
+          {label}
         </button>
       </TooltipTrigger>
-      <TooltipContent className="max-w-72 rounded-xl border border-mint-line bg-ink px-3 py-2 text-sm leading-5 text-cream">
-        {children}
-      </TooltipContent>
+      <ExplainerContent>{tooltip}</ExplainerContent>
     </Tooltip>
   );
 }
 
-export function MetricLabel({ label, tooltip }: { label: string; tooltip?: string }) {
+export function LltvBadge({ lltv }: { lltv: string }) {
   return (
-    <span className="inline-flex items-center gap-1 text-sm font-medium text-muted">
-      {label}
-      {tooltip ? <InfoTooltip label={`What is ${label}?`}>{tooltip}</InfoTooltip> : null}
-    </span>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          className="inline-flex shrink-0 cursor-help items-center gap-1 whitespace-nowrap rounded-full border border-blush-line bg-blush px-3 py-1 text-xs font-bold text-blush-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leaf"
+        >
+          LLTV {lltv}
+        </button>
+      </TooltipTrigger>
+      <ExplainerContent>
+        {`Liquidation loan-to-value: positions borrowing more than ${lltv} of their collateral's value can be liquidated.`}
+      </ExplainerContent>
+    </Tooltip>
   );
 }
 
@@ -71,6 +90,7 @@ export function LiveStatusRow({ snapshot, status }: { snapshot: PurintaSnapshot;
   );
 }
 
+/* Tones follow the series colors used everywhere else: green = borrow side, blue = supply side. */
 export function StatCard({
   label,
   value,
@@ -81,12 +101,11 @@ export function StatCard({
   label: string;
   value: string;
   detail?: string;
-  tone?: 'mint' | 'blush' | 'blue';
+  tone?: 'mint' | 'blue';
   tooltip?: string;
 }) {
   const toneClass = {
     mint: 'border-mint-line bg-mint shadow-[0_4px_0_var(--color-mint-line)]',
-    blush: 'border-blush-line bg-blush shadow-[0_4px_0_var(--color-blush-line)]',
     blue: 'border-usdc-line bg-usdc-soft shadow-[0_4px_0_var(--color-usdc-line)]',
   }[tone];
 
@@ -99,11 +118,11 @@ export function StatCard({
   );
 }
 
-export function UtilizationBar({ value }: { value: number }) {
+export function UtilizationBar({ value, track = 'bg-mint' }: { value: number; track?: string }) {
   const utilization = Math.min(100, Math.max(0, value));
 
   return (
-    <div className="h-2.5 rounded-full bg-mint" role="presentation">
+    <div className={`h-2.5 rounded-full ${track}`} role="presentation">
       <div className="h-2.5 rounded-full bg-leaf" style={{ width: `${utilization}%` }} />
     </div>
   );

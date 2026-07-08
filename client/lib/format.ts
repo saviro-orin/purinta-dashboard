@@ -14,11 +14,17 @@ export function money(value: string | number | null | undefined, digits = 2): st
 /* Headline tiles trade decimals for glanceability; exact figures live in the market cards. */
 export function compactMoney(value: string | number | null | undefined): string {
   const amount = numberValue(value);
-  if (amount < 100_000) return money(amount);
+  if (amount < 100_000) return smartMoney(amount);
   return new Intl.NumberFormat('en-US', {
     notation: 'compact',
     maximumFractionDigits: 2,
   }).format(amount);
+}
+
+/* Cents are only information when the number is small: $657.22 keeps them, $100,000.28 doesn't. */
+export function smartMoney(value: string | number | null | undefined): string {
+  const amount = numberValue(value);
+  return money(amount, Math.abs(amount) < 1_000 ? 2 : 0);
 }
 
 export function pct(value: string | number | null | undefined, digits = 2): string {

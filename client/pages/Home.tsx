@@ -1,7 +1,7 @@
 import { ArrowUpRight, ChevronRight } from 'lucide-react';
 import { useMemo } from 'react';
-import { LiveStatusRow, MetricLabel, StatCard, TokenLogo, UtilizationBar } from '../components/ui';
-import { compactMoney, money, numberValue, pct, shortAddress } from '../lib/format';
+import { LiveStatusRow, LltvBadge, MetricLabel, TokenLogo, UtilizationBar } from '../components/ui';
+import { compactMoney, numberValue, pct, shortAddress, smartMoney } from '../lib/format';
 import { usePurintaSnapshots } from '../realtime/use-purinta-snapshots';
 import { Link } from '../router';
 import type { PurintaMarket, PurintaSnapshot } from '../types';
@@ -25,8 +25,8 @@ function MarketCard({ market }: { market: PurintaMarket }) {
           </h3>
           <p className="text-sm text-muted">Borrow USDC against {market.collateral_symbol}</p>
         </div>
-        <span className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-full border border-blush-line bg-blush px-3 py-1 text-xs font-bold text-blush-ink">
-          LLTV {pct(market.lltv, 1)}
+        <span className="ml-auto">
+          <LltvBadge lltv={pct(market.lltv, 1)} />
         </span>
       </header>
 
@@ -35,13 +35,13 @@ function MarketCard({ market }: { market: PurintaMarket }) {
           <dt>
             <MetricLabel label="Borrowed" tooltip="USDC already drawn by borrowers in this market." />
           </dt>
-          <dd className="mt-0.5 text-lg font-black text-ink">${money(market.borrow_usdc)}</dd>
+          <dd className="mt-0.5 text-lg font-black text-ink">${smartMoney(market.borrow_usdc)}</dd>
         </div>
         <div>
           <dt>
             <MetricLabel label="Supplied" tooltip="Total USDC supplied to this Morpho market." />
           </dt>
-          <dd className="mt-0.5 text-lg font-black text-ink">${money(market.supply_usdc)}</dd>
+          <dd className="mt-0.5 text-lg font-black text-ink">${smartMoney(market.supply_usdc)}</dd>
         </div>
         <div>
           <dt>
@@ -120,34 +120,55 @@ export default function Home({ snapshot: initialSnapshot }: { snapshot: PurintaS
           <LiveStatusRow snapshot={snapshot} status={status} />
         </header>
 
-        <section aria-label="Totals" className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
-          <StatCard
-            label="Borrowed now"
-            value={`$${compactMoney(snapshot.total_borrow_usdc)}`}
-            detail={`${pct(totals.utilization, 1)} of supplied liquidity`}
-            tone="mint"
-            tooltip="Total USDC debt across the tracked Purinta markets."
-          />
-          <StatCard
-            label="Supplied liquidity"
-            value={`$${compactMoney(snapshot.total_supply_usdc)}`}
-            detail={`Across ${snapshot.markets.length} markets`}
-            tone="mint"
-            tooltip="USDC deposited into the tracked Morpho markets and available to lend."
-          />
-          <StatCard
-            label="Available to borrow"
-            value={`$${compactMoney(totals.availableLiquidity)}`}
-            detail="Supplied USDC not yet borrowed"
-            tone="blue"
-          />
-          <StatCard
-            label="Avg borrow APY"
-            value={pct(snapshot.weighted_borrow_apy)}
-            detail="Weighted by market borrow size"
-            tone="blush"
-            tooltip="Each market's borrow APY weighted by how much USDC is borrowed there."
-          />
+        {/* One summary panel instead of four equal tiles: the headline number leads,
+            the derived stats support, and the bar shows overall utilization at a glance. */}
+        <section
+          aria-label="Totals"
+          className="rounded-3xl border border-mint-line bg-mint p-5 shadow-[0_5px_0_var(--color-mint-line)] sm:p-6"
+        >
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <MetricLabel label="Borrowed now" tooltip="Total USDC debt across the tracked Purinta markets." />
+              <p className="mt-1 text-4xl font-black tracking-tight text-ink sm:text-5xl">
+                ${compactMoney(snapshot.total_borrow_usdc)}
+              </p>
+            </div>
+            <dl className="flex flex-wrap gap-x-8 gap-y-4">
+              <div>
+                <dt>
+                  <MetricLabel
+                    label="Supplied"
+                    tooltip="USDC deposited into the tracked Morpho markets and available to lend."
+                  />
+                </dt>
+                <dd className="mt-0.5 text-xl font-black text-ink">${compactMoney(snapshot.total_supply_usdc)}</dd>
+              </div>
+              <div>
+                <dt>
+                  <MetricLabel label="Available" tooltip="Supplied USDC not yet borrowed." />
+                </dt>
+                <dd className="mt-0.5 text-xl font-black text-ink">${compactMoney(totals.availableLiquidity)}</dd>
+              </div>
+              <div>
+                <dt>
+                  <MetricLabel
+                    label="Avg borrow APY"
+                    tooltip="Each market's borrow APY weighted by how much USDC is borrowed there."
+                  />
+                </dt>
+                <dd className="mt-0.5 text-xl font-black text-ink">{pct(snapshot.weighted_borrow_apy)}</dd>
+              </div>
+            </dl>
+          </div>
+          <div className="mt-6">
+            <div className="flex items-center justify-between gap-3">
+              <MetricLabel label="Utilization" tooltip="Borrowed USDC divided by supplied USDC, across all markets." />
+              <span className="text-sm font-black text-ink">{pct(totals.utilization, 1)}</span>
+            </div>
+            <div className="mt-2">
+              <UtilizationBar value={totals.utilization} track="bg-white" />
+            </div>
+          </div>
         </section>
 
         <section aria-label="Markets" className="grid gap-4 lg:grid-cols-2">

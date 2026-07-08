@@ -2,7 +2,7 @@ import { ArrowLeft, ArrowUpRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Area, AreaChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { LiveStatusRow, StatCard, TokenLogo } from '../components/ui';
-import { formatTime, money, pct } from '../lib/format';
+import { formatTime, pct, smartMoney } from '../lib/format';
 import { usePurintaSnapshots } from '../realtime/use-purinta-snapshots';
 import { Link } from '../router';
 import type { HistoryRange, MarketHistoryPoint, PurintaSnapshot } from '../types';
@@ -52,7 +52,7 @@ function ChartTip({
           <div key={String(entry.name)} className="flex items-center gap-2 text-sm">
             <span className="h-0.5 w-3 shrink-0 rounded-full" style={{ background: entry.color }} aria-hidden />
             <dd className="font-bold text-ink">
-              {kind === 'money' ? `$${money(entry.value as number)}` : pct(entry.value as number)}
+              {kind === 'money' ? `$${smartMoney(entry.value as number)}` : pct(entry.value as number)}
             </dd>
             <dt className="text-muted">{entry.name}</dt>
           </div>
@@ -188,8 +188,8 @@ export default function MarketDetail({
         </header>
 
         <section aria-label="Current values" className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
-          <StatCard label="Borrowed" value={`$${money(market.borrow_usdc)}`} tone="mint" />
-          <StatCard label="Supplied" value={`$${money(market.supply_usdc)}`} tone="blue" />
+          <StatCard label="Borrowed" value={`$${smartMoney(market.borrow_usdc)}`} tone="mint" />
+          <StatCard label="Supplied" value={`$${smartMoney(market.supply_usdc)}`} tone="blue" />
           <StatCard
             label="Borrow APY"
             value={pct(market.borrow_apy)}
@@ -390,8 +390,8 @@ export default function MarketDetail({
                       {points.map((point) => (
                         <tr key={point.t} className="border-t border-line">
                           <td className="py-2 pr-4 text-muted">{formatTime(point.t)}</td>
-                          <td className="py-2 pr-4 font-semibold text-ink">${money(point.borrow_usdc)}</td>
-                          <td className="py-2 pr-4 font-semibold text-ink">${money(point.supply_usdc)}</td>
+                          <td className="py-2 pr-4 font-semibold text-ink">${smartMoney(point.borrow_usdc)}</td>
+                          <td className="py-2 pr-4 font-semibold text-ink">${smartMoney(point.supply_usdc)}</td>
                           <td className="py-2 pr-4">{pct(point.utilization)}</td>
                           <td className="py-2 pr-4">{pct(point.borrow_apy)}</td>
                           <td className="py-2">{pct(point.net_supply_apy)}</td>
