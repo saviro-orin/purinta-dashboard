@@ -3,29 +3,28 @@
 @source "../css";
 @source "..";
 
-/* Dark mode via class on <html> or prefers-color-scheme */
-@custom-variant dark (&:where(.dark, .dark *));
-
-/* Single accent token. Components reference it as `bg-primary`,
-   `text-primary`, `focus-visible:outline-primary`, etc.
-   Replace with your project's brand color when forking. */
+/* Purinta palette. Cream base, deep-green ink, mint/blush/blue panels.
+   Every color in the UI comes from these tokens; no raw hex in markup. */
 @theme {
   --color-primary: #39763d;
-  --color-purinta-green: #39763d;
-  --color-purinta-green-dark: #185229;
-  --color-purinta-cream: #fcfbf5;
-  --color-purinta-blush: #feaaa4;
-  --color-purinta-usdc: #3e73c4;
+  --color-cream: #fcfbf5;
+  --color-ink: #185229;
+  --color-leaf: #39763d;
+  --color-mint: #e7f4ec;
+  --color-mint-line: #c8e4b0;
+  --color-blush: #fff5f4;
+  --color-blush-line: #fedbd8;
+  --color-blush-ink: #8c1c5f;
+  --color-usdc: #3e73c4;
+  --color-usdc-soft: #edf4ff;
+  --color-usdc-line: #b2d0ff;
+  --color-line: #eae5c9;
+  --color-muted: #5c5c50;
 }
 
-/* Base page colours for both modes. Cards (`bg-white dark:bg-gray-900`)
-   visibly separate from the body in dark mode because the body sits
-   one shade darker (`gray-950`). Components inherit text colour from
-   the body, so individual elements only need overrides when they
-   diverge (muted text, links, etc.). */
 @layer base {
 	body {
-		@apply bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-50;
+		@apply bg-cream text-ink;
 	}
 }
 
@@ -44,4 +43,10 @@
 
 @utility animate-slow-pulse {
   animation: slow-pulse 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.animate-slow-pulse {
+		animation: none;
+	}
 }

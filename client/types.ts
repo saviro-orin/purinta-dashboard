@@ -21,6 +21,23 @@ export interface PurintaMarket {
   net_supply_apy: string;
 }
 
+export type HistoryRange = '24h' | '7d' | '30d';
+
+export interface MarketHistoryPoint {
+  t: string;
+  borrow_usdc: number;
+  supply_usdc: number;
+  utilization: number;
+  borrow_apy: number;
+  net_supply_apy: number;
+}
+
+export interface MarketHistory {
+  market_id: string;
+  range: HistoryRange;
+  points: MarketHistoryPoint[];
+}
+
 export interface PurintaSnapshot {
   fetched_at: string | null;
   block_number: number | null;

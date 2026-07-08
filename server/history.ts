@@ -1,0 +1,74 @@
+import type { Database } from 'bun:sqlite';
+import type { PurintaSnapshot } from './types';
+
+export type HistoryRange = '24h' | '7d' | '30d';
+
+export interface MarketHistoryPoint {
+  t: string;
+  borrow_usdc: number;
+  supply_usdc: number;
+  utilization: number;
+  borrow_apy: number;
+  net_supply_apy: number;
+}
+
+export interface MarketHistory {
+  market_id: string;
+  range: HistoryRange;
+  points: MarketHistoryPoint[];
+}
+
+// Range window plus bucket width chosen to keep each series under ~360 points.
+const RANGES: Record<HistoryRange, { ms: number; bucketSeconds: number }> = {
+  '24h': { ms: 24 * 60 * 60 * 1000, bucketSeconds: 300 },
+  '7d': { ms: 7 * 24 * 60 * 60 * 1000, bucketSeconds: 1800 },
+  '30d': { ms: 30 * 24 * 60 * 60 * 1000, bucketSeconds: 7200 },
+};
+
+export function isHistoryRange(value: string): value is HistoryRange {
+  return value in RANGES;
+}
+
+function toNumber(value: string | number | null | undefined): number {
+  if (value === null || value === undefined) return 0;
+  const parsed = typeof value === 'number' ? value : Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+export function marketHistory(db: Database, marketId: string, range: HistoryRange, now = Date.now()): MarketHistory {
+  const { ms, bucketSeconds } = RANGES[range];
+  const cutoff = new Date(now - ms).toISOString();
+
+  // One snapshot per time bucket (the latest in the bucket) keeps the
+  // payload-parsing work bounded no matter how dense the poller data is.
+  const rows = db
+    .query<{ payload: string }, [string, number]>(
+      `SELECT payload FROM market_snapshots
+       WHERE id IN (
+         SELECT MAX(id) FROM market_snapshots
+         WHERE fetched_at >= ?1
+         GROUP BY CAST(unixepoch(fetched_at) / ?2 AS INTEGER)
+       )
+       ORDER BY fetched_at ASC`
+    )
+    .all(cutoff, bucketSeconds);
+
+  const points: MarketHistoryPoint[] = [];
+
+  for (const row of rows) {
+    const snapshot = JSON.parse(row.payload) as PurintaSnapshot;
+    const market = snapshot.markets.find((entry) => entry.id === marketId);
+    if (!market || !snapshot.fetched_at) continue;
+
+    points.push({
+      t: snapshot.fetched_at,
+      borrow_usdc: toNumber(market.borrow_usdc),
+      supply_usdc: toNumber(market.supply_usdc),
+      utilization: toNumber(market.utilization),
+      borrow_apy: toNumber(market.borrow_apy),
+      net_supply_apy: toNumber(market.net_supply_apy),
+    });
+  }
+
+  return { market_id: marketId, range, points };
+}

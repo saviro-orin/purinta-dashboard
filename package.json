@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun --watch server/index.ts",
+    "dev": "bun scripts/dev.ts",
+    "dev:server": "bun --watch server/index.ts",
     "build": "vite build && bun build server/index.ts --target=bun --outdir=dist/server --external=bun:sqlite",
     "start": "bun dist/server/index.js",
     "lint": "biome check client server scripts test vite.config.ts",
@@ -24,6 +25,7 @@
     "lucide-react": "^1.17.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "recharts": "^3.9.2",
     "vite": "^7.2.7",
     "zod": "^4.2.1"
   },

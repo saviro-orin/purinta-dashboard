@@ -1,71 +1,40 @@
 # Purinta Dashboard
 
-Mobile-friendly Bun + React dashboard for monitoring Purinta's live Morpho markets.
+A public, read-only dashboard for monitoring Purinta's live Morpho markets: how much USDC is borrowed against PEPE and SPX collateral, current APYs, utilization, and liquidity. Updates arrive in the browser over a WebSocket as the server polls the chain.
 
-## What it shows
+Built with Bun, Hono, SQLite, and Vite + React.
 
-- Active USDC borrows for Purinta's PEPE and SPX collateral markets.
-- Supply, borrow, utilization, LLTV, borrow APY, supply APY, and net supply APY.
-- Ethereum block height checked for the current snapshot.
-- Live browser updates over a native WebSocket.
-
-## Stack
-
-- Bun + Hono for the HTTP/WebSocket server.
-- SQLite for persisted market snapshots.
-- Vite + React + Tailwind for the frontend.
-- Optional Envio HyperIndex scaffold in `indexer/` for future event indexing.
-
-## Local development
+## Quick start
 
 ```bash
 bun install
 bun run dev
 ```
 
-The server defaults to:
+Then open http://localhost:4301. That's it: one command runs both the API server (port 4300) and the Vite dev server with hot reload. No build step is needed for development.
 
-```text
-http://localhost:4300
-```
+## What it shows
 
-Build and verify:
+- Total USDC borrowed, supplied, and still available across the tracked markets.
+- Per-market borrow APY, net supply APY, utilization, and LLTV.
+- Live connection status and the Ethereum block behind the current snapshot.
 
-```bash
-bun run verify
-```
+Data comes from the Morpho Blue API and an Ethereum JSON-RPC endpoint. Snapshots are persisted to SQLite so history survives restarts.
 
-## Docker
+## Commands
 
-```bash
-docker compose up -d --build
-```
+| Command | What it does |
+| --- | --- |
+| `bun run dev` | Start the API server and Vite dev server together |
+| `bun run verify` | Lint, typecheck, test, and build |
+| `bun test` | Run the test suite |
+| `bun run build` | Build the frontend and server for production |
+| `bun run start` | Serve the production build on port 4300 |
+| `bun run smoke:http` / `bun run smoke:ws` | Smoke-check a running server |
 
-Open:
+## Configuration
 
-```text
-http://localhost:4300
-http://192.168.1.182:4300
-```
-
-SQLite snapshots are stored in:
-
-```text
-./data/purinta-dashboard.sqlite3
-```
-
-## Smoke checks
-
-```bash
-bun run smoke:http
-bun run smoke:ws
-```
-
-## Environment
-
-See `.env.example`.
-
-Common values:
+Copy `.env.example` to `.env` and adjust as needed. Defaults work out of the box:
 
 ```env
 PORT=4300
@@ -73,4 +42,22 @@ SQLITE_PATH=./data/purinta-dashboard.sqlite3
 PURINTA_POLL_INTERVAL_MS=30000
 ETHEREUM_RPC_URL=https://ethereum-rpc.publicnode.com
 MORPHO_GRAPHQL_URL=https://blue-api.morpho.org/graphql
+```
+
+## Production (Docker)
+
+```bash
+docker compose up -d --build
+```
+
+The app serves on port 4300 and stores SQLite data in `./data`. Health check: `curl -fsS http://localhost:4300/health`.
+
+## Project layout
+
+```
+client/    React frontend (Vite + Tailwind)
+server/    Bun + Hono API, WebSocket, and Morpho poller
+scripts/   Dev runner and smoke checks
+indexer/   Optional Envio HyperIndex scaffold (sidecar, not wired in)
+test/      Bun tests
 ```

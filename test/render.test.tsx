@@ -43,8 +43,8 @@ describe('Home page rendering', () => {
       </TooltipProvider>
     );
 
-    expect(html).toContain('How much USDC is borrowed');
-    expect(html).toContain('Market table');
+    expect(html).toContain('Purinta markets');
+    expect(html).toContain('Borrowed now');
     expect(html).toContain('PEPE / USDC');
   });
 });

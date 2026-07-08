@@ -4,6 +4,7 @@ import { Hono } from 'hono';
 import { serveStatic } from 'hono/bun';
 import { config } from './config';
 import { db } from './db';
+import { isHistoryRange, marketHistory } from './history';
 import { runMigrations } from './migrations';
 import { startPoller } from './poller';
 import { latestSnapshot } from './snapshots';
@@ -18,11 +19,23 @@ const indexPath = join(clientRoot, 'index.html');
 
 app.get('/health', (c) => c.json({ status: 'ok' }));
 app.get('/api/snapshot', (c) => c.json(latestSnapshot(db)));
+app.get('/api/markets/:id/history', (c) => {
+  const range = c.req.query('range') ?? '24h';
+  if (!isHistoryRange(range)) {
+    return c.json({ error: 'range must be one of 24h, 7d, 30d' }, 400);
+  }
+  return c.json(marketHistory(db, c.req.param('id'), range));
+});
 app.use('/assets/*', serveStatic({ root: clientRoot }));
 app.use('/images/*', serveStatic({ root: './public' }));
 app.use('/favicon.ico', serveStatic({ root: clientRoot }));
 app.get('*', (c) => {
-  if (!existsSync(indexPath)) return c.text('Frontend has not been built. Run bun run build.', 503);
+  if (!existsSync(indexPath)) {
+    return c.text(
+      'No production frontend build found. In development, open the Vite dev server at http://localhost:4301 (started by bun run dev). For production, run bun run build.',
+      503
+    );
+  }
   return c.html(readFileSync(indexPath, 'utf8'));
 });
 

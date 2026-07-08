@@ -13,6 +13,7 @@ export default defineConfig({
     proxy: {
       '/api': 'http://localhost:4300',
       '/health': 'http://localhost:4300',
+      '/images': 'http://localhost:4300',
       '/ws': {
         target: 'ws://localhost:4300',
         ws: true,

@@ -13,9 +13,14 @@ Bun + Hono + SQLite + Vite React application for monitoring Purinta markets.
 - The optional Envio HyperIndex scaffold lives in `indexer/` and should stay sidecar-shaped until credentials and the full event-indexing path are ready.
 - Do not expose secrets. `ENVIO_API_TOKEN` and RPC provider keys belong in `.env`/deployment secrets only.
 
+## Git
+
+- Never add a co-author (such as Claude) to commit messages or PRs. No `Co-Authored-By` trailers or "Generated with" footers.
+
 ## Commands
 
 - `bun install` for deps.
+- `bun run dev` for local development: starts the API server (4300) and Vite with hot reload (4301) together; no build step needed.
 - `bun run verify` for lint, typecheck, tests, and build.
 - `docker compose up -d --build` for local Docker on port 4300.
 - Health check: `curl -fsS http://localhost:4300/health`.
