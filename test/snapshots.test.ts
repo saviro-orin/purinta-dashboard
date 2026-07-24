@@ -12,8 +12,11 @@ const snapshot: PurintaSnapshot = {
   morpho_blue: 'morpho',
   total_borrow_usdc: '10',
   total_supply_usdc: '20',
+  total_borrow_usd: '10',
+  total_supply_usd: '20',
   weighted_borrow_apy: '3.5',
   markets: [],
+  deployments: [],
   status: 'live',
   event_sync: {
     status: 'syncing',
@@ -46,5 +49,20 @@ describe('snapshots', () => {
     expect(latest.block_number).toBe(snapshot.block_number);
     expect(latest.event_sync.status).toBe('live');
     expect(latest.event_sync.lag_blocks).toBe(0);
+  });
+
+  test('normalizes legacy USDC amount fields from persisted snapshots', () => {
+    const db = new Database(':memory:');
+    runMigrations(db);
+    const legacy = {
+      ...snapshot,
+      markets: [{ id: 'legacy', loan_symbol: 'USDC', borrow_usdc: '7', supply_usdc: '9' }],
+    } as unknown as PurintaSnapshot;
+
+    saveSnapshot(db, legacy);
+    const market = latestSnapshot(db).markets[0];
+
+    expect(market?.borrow_assets).toBe('7');
+    expect(market?.supply_assets).toBe('9');
   });
 });

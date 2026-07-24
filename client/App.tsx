@@ -62,10 +62,10 @@ export function App() {
       routes={[
         { path: '/', render: () => <Home snapshot={snapshot} /> },
         {
-          path: '/market/:id',
-          render: ({ id }) => (
+          path: '/market/:chainId/:id',
+          render: ({ chainId, id }) => (
             <Suspense fallback={<main className="min-h-screen bg-cream" />}>
-              <MarketDetail marketId={id as string} snapshot={snapshot} />
+              <MarketDetail chainId={Number(chainId)} marketId={id as string} snapshot={snapshot} />
             </Suspense>
           ),
         },

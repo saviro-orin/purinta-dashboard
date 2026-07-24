@@ -6,14 +6,23 @@ export interface Flash {
 export interface PurintaMarket {
   id: string;
   name: string;
+  chain_id?: number;
+  chain_name?: string;
+  morpho_network?: string;
+  explorer_url?: string;
   loan_symbol: string;
   collateral_symbol: string;
   collateral_address: string;
+  collateral_logo_url?: string | null;
   oracle_address: string;
   lltv: string;
-  borrow_usdc: string;
+  borrow_assets?: string;
+  /** @deprecated Use borrow_assets. */
+  borrow_usdc: string | null;
   borrow_usd: string;
-  supply_usdc: string;
+  supply_assets?: string;
+  /** @deprecated Use supply_assets. */
+  supply_usdc: string | null;
   supply_usd: string;
   utilization: string;
   borrow_apy: string;
@@ -21,18 +30,31 @@ export interface PurintaMarket {
   net_supply_apy: string;
 }
 
+export interface PurintaDeployment {
+  chain_id: number;
+  chain_name: string;
+  vault_address: string;
+  explorer_url: string;
+  morpho_url: string;
+}
+
 export type HistoryRange = '24h' | '7d' | '30d';
 
 export interface MarketHistoryPoint {
   t: string;
-  borrow_usdc: number;
-  supply_usdc: number;
+  borrow_assets: number;
+  supply_assets: number;
+  /** @deprecated Use borrow_assets. */
+  borrow_usdc: number | null;
+  /** @deprecated Use supply_assets. */
+  supply_usdc: number | null;
   utilization: number;
   borrow_apy: number;
   net_supply_apy: number;
 }
 
 export interface MarketHistory {
+  chain_id: number;
   market_id: string;
   range: HistoryRange;
   points: MarketHistoryPoint[];
@@ -56,8 +78,11 @@ export interface PurintaSnapshot {
   morpho_blue: string;
   total_borrow_usdc: string;
   total_supply_usdc: string;
+  total_borrow_usd?: string;
+  total_supply_usd?: string;
   weighted_borrow_apy: string;
   markets: PurintaMarket[];
+  deployments?: PurintaDeployment[];
   status: string;
   event_sync: EventSyncStatus;
 }

@@ -6,11 +6,11 @@ product
 
 ## Users
 
-Purinta community members and DeFi-curious observers checking market health on their phones or desktops. No accounts, no auth: anyone with the URL. Their job: glance at the dashboard and answer "how much USDC is borrowed against Purinta meme collateral, and are the markets healthy?" in under ten seconds.
+Purinta community members and DeFi-curious observers checking market health on their phones or desktops. No accounts, no auth: anyone with the URL. Their job: glance at the dashboard and answer "how much stablecoin value is borrowed against Purinta meme collateral, and are the markets healthy?" in under ten seconds.
 
 ## Product Purpose
 
-A public, read-only monitoring dashboard for Purinta's PEPE and SPX collateral markets on Morpho (Ethereum mainnet). It shows live borrow/supply totals, utilization, APYs, LLTV, and feed status via WebSocket snapshots. Success: a first-time visitor understands the numbers without a DeFi glossary, and a returning visitor gets the answer at a glance.
+A public, read-only monitoring dashboard for Purinta's Morpho markets across Ethereum and Robinhood Chain. It currently covers PEPE, SPX, SHIB, and CASHCAT collateral and automatically adopts new Ethereum markets discovered from Purinta vault events. It shows live USD-valued borrow/supply totals, native stablecoin amounts, utilization, APYs, LLTV, and feed status via WebSocket snapshots. Success: a first-time visitor understands the numbers without a DeFi glossary, and a returning visitor gets the answer at a glance.
 
 ## Brand Personality
 

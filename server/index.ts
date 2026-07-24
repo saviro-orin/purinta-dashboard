@@ -23,12 +23,16 @@ const indexPath = join(clientRoot, 'index.html');
 
 app.get('/health', (c) => c.json({ status: 'ok', indexer: eventIndexerState(db) }));
 app.get('/api/snapshot', (c) => c.json(latestSnapshot(db)));
-app.get('/api/markets/:id/history', (c) => {
+app.get('/api/markets/:chainId/:id/history', (c) => {
+  const chainId = Number(c.req.param('chainId'));
+  if (!Number.isSafeInteger(chainId) || chainId <= 0) {
+    return c.json({ error: 'chainId must be a positive integer' }, 400);
+  }
   const range = c.req.query('range') ?? '24h';
   if (!isHistoryRange(range)) {
     return c.json({ error: 'range must be one of 24h, 7d, 30d' }, 400);
   }
-  return c.json(marketHistory(db, c.req.param('id'), range));
+  return c.json(marketHistory(db, chainId, c.req.param('id'), range));
 });
 app.use('/assets/*', serveStatic({ root: clientRoot }));
 app.use('/images/*', serveStatic({ root: './public' }));
