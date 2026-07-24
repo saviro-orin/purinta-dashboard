@@ -20,7 +20,7 @@ export function startPoller(db: Database) {
     running = true;
 
     try {
-      const fetched = await fetchSnapshot();
+      const fetched = await fetchSnapshot(db);
       const snapshot = { ...fetched, event_sync: classifyEventSync(db, fetched.block_number) };
       saveSnapshot(db, snapshot);
       broadcastSnapshot(snapshot);

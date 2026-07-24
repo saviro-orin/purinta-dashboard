@@ -5,14 +5,19 @@ export type HistoryRange = '24h' | '7d' | '30d';
 
 export interface MarketHistoryPoint {
   t: string;
-  borrow_usdc: number;
-  supply_usdc: number;
+  borrow_assets: number;
+  supply_assets: number;
+  /** @deprecated Use borrow_assets. Null for non-USDC loan markets. */
+  borrow_usdc: number | null;
+  /** @deprecated Use supply_assets. Null for non-USDC loan markets. */
+  supply_usdc: number | null;
   utilization: number;
   borrow_apy: number;
   net_supply_apy: number;
 }
 
 export interface MarketHistory {
+  chain_id: number;
   market_id: string;
   range: HistoryRange;
   points: MarketHistoryPoint[];
@@ -35,7 +40,13 @@ function toNumber(value: string | number | null | undefined): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-export function marketHistory(db: Database, marketId: string, range: HistoryRange, now = Date.now()): MarketHistory {
+export function marketHistory(
+  db: Database,
+  chainId: number,
+  marketId: string,
+  range: HistoryRange,
+  now = Date.now()
+): MarketHistory {
   const { ms, bucketSeconds } = RANGES[range];
   const cutoff = new Date(now - ms).toISOString();
 
@@ -57,18 +68,24 @@ export function marketHistory(db: Database, marketId: string, range: HistoryRang
 
   for (const row of rows) {
     const snapshot = JSON.parse(row.payload) as PurintaSnapshot;
-    const market = snapshot.markets.find((entry) => entry.id === marketId);
+    const market = snapshot.markets.find((entry) => (entry.chain_id ?? 1) === chainId && entry.id === marketId);
     if (!market || !snapshot.fetched_at) continue;
+
+    const borrowAssets = toNumber(market.borrow_assets ?? market.borrow_usdc);
+    const supplyAssets = toNumber(market.supply_assets ?? market.supply_usdc);
+    const isUsdc = market.loan_symbol === 'USDC';
 
     points.push({
       t: snapshot.fetched_at,
-      borrow_usdc: toNumber(market.borrow_usdc),
-      supply_usdc: toNumber(market.supply_usdc),
+      borrow_assets: borrowAssets,
+      supply_assets: supplyAssets,
+      borrow_usdc: isUsdc ? borrowAssets : null,
+      supply_usdc: isUsdc ? supplyAssets : null,
       utilization: toNumber(market.utilization),
       borrow_apy: toNumber(market.borrow_apy),
       net_supply_apy: toNumber(market.net_supply_apy),
     });
   }
 
-  return { market_id: marketId, range, points };
+  return { chain_id: chainId, market_id: marketId, range, points };
 }

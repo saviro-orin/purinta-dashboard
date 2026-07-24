@@ -9,15 +9,15 @@ import type { HistoryRange, MarketHistoryPoint, PurintaSnapshot } from '../types
 
 const RANGES: HistoryRange[] = ['24h', '7d', '30d'];
 
-/* Series colors: green = borrow side, USDC blue = supply side, everywhere. */
+/* Series colors: green = borrow side, blue = supply side, everywhere. */
 const BORROW_COLOR = '#39763d';
 const SUPPLY_COLOR = '#3e73c4';
 const GRID_COLOR = '#efebdc';
 const CURSOR = { stroke: '#d6d2b2', strokeWidth: 1 };
 const AXIS_TICK = { fill: '#5c5c50', fontSize: 12 };
 
-function axisMoney(value: number): string {
-  return `$${new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(value)}`;
+function axisAmount(value: number): string {
+  return new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(value);
 }
 
 function axisPct(value: number): string {
@@ -36,11 +36,13 @@ function ChartTip({
   payload,
   label,
   kind,
+  symbol,
 }: {
   active?: boolean;
   payload?: ReadonlyArray<{ name?: string | number; value?: number | string; color?: string }>;
   label?: string;
-  kind: 'money' | 'pct';
+  kind: 'asset' | 'pct';
+  symbol?: string;
 }) {
   if (!active || !payload || payload.length === 0) return null;
 
@@ -52,7 +54,9 @@ function ChartTip({
           <div key={String(entry.name)} className="flex items-center gap-2 text-sm">
             <span className="h-0.5 w-3 shrink-0 rounded-full" style={{ background: entry.color }} aria-hidden />
             <dd className="font-bold text-ink">
-              {kind === 'money' ? `$${smartMoney(entry.value as number)}` : pct(entry.value as number)}
+              {kind === 'asset'
+                ? `${smartMoney(entry.value as number)} ${symbol ?? ''}`.trim()
+                : pct(entry.value as number)}
             </dd>
             <dt className="text-muted">{entry.name}</dt>
           </div>
@@ -101,14 +105,16 @@ function ChartCard({
 const activeDot = { r: 4, strokeWidth: 2, stroke: '#ffffff' };
 
 export default function MarketDetail({
+  chainId,
   marketId,
   snapshot: initialSnapshot,
 }: {
+  chainId: number;
   marketId: string;
   snapshot: PurintaSnapshot;
 }) {
   const { snapshot, status } = usePurintaSnapshots<PurintaSnapshot>(initialSnapshot);
-  const market = snapshot.markets.find((entry) => entry.id === marketId);
+  const market = snapshot.markets.find((entry) => (entry.chain_id ?? 1) === chainId && entry.id === marketId);
 
   const [range, setRange] = useState<HistoryRange>('24h');
   const [points, setPoints] = useState<MarketHistoryPoint[] | null>(null);
@@ -120,7 +126,7 @@ export default function MarketDetail({
     setLoading(true);
     setLoadError(null);
 
-    fetch(`/api/markets/${marketId}/history?range=${range}`)
+    fetch(`/api/markets/${chainId}/${marketId}/history?range=${range}`)
       .then(async (response) => {
         if (!response.ok) throw new Error(`History request failed with ${response.status}`);
         const history = (await response.json()) as { points: MarketHistoryPoint[] };
@@ -136,7 +142,7 @@ export default function MarketDetail({
     return () => {
       cancelled = true;
     };
-  }, [marketId, range]);
+  }, [chainId, marketId, range]);
 
   if (!market) {
     return (
@@ -175,12 +181,13 @@ export default function MarketDetail({
         <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-center gap-3">
             <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-mint-line bg-mint">
-              <TokenLogo symbol={market.collateral_symbol} className="h-9 w-9" />
+              <TokenLogo symbol={market.collateral_symbol} logoUrl={market.collateral_logo_url} className="h-9 w-9" />
             </span>
             <div>
               <h1 className="text-2xl font-black tracking-tight text-ink sm:text-3xl">{market.name}</h1>
               <p className="mt-1 text-sm text-muted">
-                Borrow USDC against {market.collateral_symbol} · LLTV {pct(market.lltv, 1)}
+                Borrow {market.loan_symbol} against {market.collateral_symbol} on {market.chain_name ?? 'Ethereum'} ·
+                LLTV {pct(market.lltv, 1)}
               </p>
             </div>
           </div>
@@ -188,8 +195,8 @@ export default function MarketDetail({
         </header>
 
         <section aria-label="Current values" className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
-          <StatCard label="Borrowed" value={`$${smartMoney(market.borrow_usdc)}`} tone="mint" />
-          <StatCard label="Supplied" value={`$${smartMoney(market.supply_usdc)}`} tone="blue" />
+          <StatCard label="Borrowed" value={`$${smartMoney(market.borrow_usd)}`} tone="mint" />
+          <StatCard label="Supplied" value={`$${smartMoney(market.supply_usd)}`} tone="blue" />
           <StatCard
             label="Borrow APY"
             value={pct(market.borrow_apy)}
@@ -240,7 +247,7 @@ export default function MarketDetail({
           ) : (
             <div className={`grid min-w-0 gap-4 lg:grid-cols-2 ${loading ? 'opacity-60' : ''}`}>
               <div className="min-w-0 lg:col-span-2">
-                <ChartCard title="Borrowed vs supplied USDC" legend={usdcLegend}>
+                <ChartCard title={`${market.loan_symbol} borrowed vs supplied`} legend={usdcLegend}>
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={points} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
                       <CartesianGrid vertical={false} stroke={GRID_COLOR} strokeWidth={1} />
@@ -254,17 +261,17 @@ export default function MarketDetail({
                         dy={6}
                       />
                       <YAxis
-                        tickFormatter={axisMoney}
+                        tickFormatter={axisAmount}
                         tick={AXIS_TICK}
                         tickLine={false}
                         axisLine={false}
                         width={56}
                         domain={[0, 'auto']}
                       />
-                      <Tooltip content={<ChartTip kind="money" />} cursor={CURSOR} />
+                      <Tooltip content={<ChartTip kind="asset" symbol={market.loan_symbol} />} cursor={CURSOR} />
                       <Line
                         type="monotone"
-                        dataKey="supply_usdc"
+                        dataKey="supply_assets"
                         name="Supplied"
                         stroke={SUPPLY_COLOR}
                         strokeWidth={2}
@@ -274,7 +281,7 @@ export default function MarketDetail({
                       />
                       <Line
                         type="monotone"
-                        dataKey="borrow_usdc"
+                        dataKey="borrow_assets"
                         name="Borrowed"
                         stroke={BORROW_COLOR}
                         strokeWidth={2}
@@ -390,8 +397,12 @@ export default function MarketDetail({
                       {points.map((point) => (
                         <tr key={point.t} className="border-t border-line">
                           <td className="py-2 pr-4 text-muted">{formatTime(point.t)}</td>
-                          <td className="py-2 pr-4 font-semibold text-ink">${smartMoney(point.borrow_usdc)}</td>
-                          <td className="py-2 pr-4 font-semibold text-ink">${smartMoney(point.supply_usdc)}</td>
+                          <td className="py-2 pr-4 font-semibold text-ink">
+                            {smartMoney(point.borrow_assets)} {market.loan_symbol}
+                          </td>
+                          <td className="py-2 pr-4 font-semibold text-ink">
+                            {smartMoney(point.supply_assets)} {market.loan_symbol}
+                          </td>
                           <td className="py-2 pr-4">{pct(point.utilization)}</td>
                           <td className="py-2 pr-4">{pct(point.borrow_apy)}</td>
                           <td className="py-2">{pct(point.net_supply_apy)}</td>
@@ -411,15 +422,22 @@ export default function MarketDetail({
               <strong className="font-black text-ink">Current market snapshot:</strong> balances, rates, and utilization
               refresh about every 30 seconds.
             </p>
-            <p>
-              <strong className="font-black text-ink">Event ledger:</strong> market activity is indexed separately for a
-              durable history and sync status.
-            </p>
+            {market.chain_id === 4663 ? (
+              <p>
+                <strong className="font-black text-ink">Snapshot history:</strong> Robinhood Chain history is recorded
+                from periodic market snapshots. Event indexing currently covers Ethereum only.
+              </p>
+            ) : (
+              <p>
+                <strong className="font-black text-ink">Ethereum event ledger:</strong> market activity is indexed
+                separately for durable history and sync status.
+              </p>
+            )}
           </div>
           <p className="flex flex-wrap gap-x-4 gap-y-1 font-semibold text-leaf sm:justify-end">
             <a
               className="inline-flex items-center gap-1 hover:text-ink"
-              href={`https://app.morpho.org/market?id=${market.id}&network=mainnet`}
+              href={`https://app.morpho.org/market?id=${market.id}&network=${market.morpho_network ?? 'mainnet'}`}
               target="_blank"
               rel="noreferrer"
             >
@@ -427,7 +445,7 @@ export default function MarketDetail({
             </a>
             <a
               className="inline-flex items-center gap-1 hover:text-ink"
-              href={`https://etherscan.io/token/${market.collateral_address}`}
+              href={`${market.explorer_url ?? 'https://etherscan.io'}/token/${market.collateral_address}`}
               target="_blank"
               rel="noreferrer"
             >

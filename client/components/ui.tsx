@@ -1,6 +1,14 @@
+import { useState } from 'react';
 import { formatTime } from '../lib/format';
 import type { PurintaSnapshot } from '../types';
 import { Tooltip, TooltipContent, TooltipTrigger } from './Tooltip';
+
+const TOKEN_LOGOS: Record<string, string> = {
+  CASHCAT: '/images/tokens/cashcat.svg',
+  PEPE: '/images/tokens/pepe.svg',
+  SHIB: '/images/tokens/shib.svg',
+  SPX: '/images/tokens/spx.png',
+};
 
 function ExplainerContent({ children }: { children: string }) {
   return (
@@ -50,15 +58,40 @@ export function LltvBadge({ lltv }: { lltv: string }) {
   );
 }
 
-export function TokenLogo({ symbol, className = 'h-8 w-8' }: { symbol: string; className?: string }) {
+export function TokenLogo({
+  symbol,
+  logoUrl,
+  className = 'h-8 w-8',
+}: {
+  symbol: string;
+  logoUrl?: string | null;
+  className?: string;
+}) {
+  const [failed, setFailed] = useState(false);
   const upper = symbol.toUpperCase();
-  const src = upper.includes('PEPE')
-    ? 'https://app.purinta.xyz/assets/Pepe-BV89tIWU.svg'
-    : upper.includes('SPX')
-      ? 'https://app.purinta.xyz/assets/Spx-BF2tRkT5.svg'
-      : '/images/tokens/usdc.svg';
+  const src = failed ? null : (TOKEN_LOGOS[upper] ?? logoUrl ?? null);
 
-  return <img src={src} alt={`${symbol} logo`} className={`${className} rounded-full object-contain`} loading="lazy" />;
+  if (src === null) {
+    return (
+      <span
+        role="img"
+        aria-label={`${symbol} token`}
+        className={`${className} inline-flex items-center justify-center rounded-full bg-usdc-soft text-[0.55rem] font-black tracking-tight text-usdc`}
+      >
+        {upper.slice(0, 3)}
+      </span>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={`${symbol} logo`}
+      className={`${className} rounded-full object-contain`}
+      loading="lazy"
+      onError={() => setFailed(true)}
+    />
+  );
 }
 
 export function StatusPill({ status }: { status: string }) {
@@ -95,11 +128,11 @@ const EVENT_SYNC_TONE: Record<PurintaSnapshot['event_sync']['status'], string> =
 };
 
 const EVENT_SYNC_LABEL: Record<PurintaSnapshot['event_sync']['status'], string> = {
-  live: 'Event ledger live',
-  syncing: 'Event ledger catching up',
-  error: 'Event ledger needs attention',
-  disabled: 'Event ledger off',
-  unknown: 'Event ledger checking',
+  live: 'Ethereum events live',
+  syncing: 'Ethereum events catching up',
+  error: 'Ethereum events need attention',
+  disabled: 'Ethereum events off',
+  unknown: 'Ethereum events checking',
 };
 
 const EVENT_SYNC_DOT: Record<PurintaSnapshot['event_sync']['status'], string> = {
@@ -135,7 +168,7 @@ export function LiveStatusRow({ snapshot, status }: { snapshot: PurintaSnapshot;
         <StatusPill status={status} />
         <span>Updated {formatTime(snapshot.fetched_at)}</span>
         <span aria-hidden>·</span>
-        <span>Block {snapshot.block_number?.toLocaleString() ?? 'syncing'}</span>
+        <span>Ethereum block {snapshot.block_number?.toLocaleString() ?? 'syncing'}</span>
       </div>
       {detail === null ? (
         <span className={pillClass}>{pillContent}</span>

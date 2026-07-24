@@ -9,6 +9,8 @@ import type { EventSyncStatus } from './types';
 const INDEXER_NAME = 'morpho-events';
 const USDC_DECIMALS = 6;
 const log = createLogger('event-indexer');
+export const EVENT_INDEXER_MARKETS = PURINTA_MARKETS.filter((market) => market.chain_id === 1);
+const ETHEREUM_CONFIGURED_MARKET_IDS = new Set(EVENT_INDEXER_MARKETS.map((market) => market.id.toLowerCase()));
 
 const MORPHO_EVENTS = [
   parseAbiItem(
@@ -85,14 +87,20 @@ function toIso(timestamp: number) {
 }
 
 function knownMarket(marketId: string) {
-  return PURINTA_MARKETS.find((market) => market.id.toLowerCase() === marketId.toLowerCase());
+  return EVENT_INDEXER_MARKETS.find((market) => market.id.toLowerCase() === marketId.toLowerCase());
 }
 
 function initialLastIndexedBlock() {
   return config.PURINTA_INDEXER_START_BLOCK - 1;
 }
 
-function ensureSeedMarkets(db: Database) {
+export function ensureSeedMarkets(db: Database) {
+  const configuredIds = EVENT_INDEXER_MARKETS.map((market) => market.id.toLowerCase());
+  const placeholders = configuredIds.map((_, index) => `?${index + 1}`).join(', ');
+  db.query(`DELETE FROM market_registry WHERE source = 'configured' AND market_id NOT IN (${placeholders})`).run(
+    ...configuredIds
+  );
+
   const statement = db.query(
     `INSERT INTO market_registry (
        market_id, name, loan_symbol, collateral_symbol, collateral_address, oracle_address, lltv,
@@ -109,7 +117,7 @@ function ensureSeedMarkets(db: Database) {
   );
   const now = new Date().toISOString();
 
-  for (const market of PURINTA_MARKETS) {
+  for (const market of EVENT_INDEXER_MARKETS) {
     statement.run(
       market.id.toLowerCase(),
       market.name,
@@ -337,15 +345,22 @@ function decodeLog(entry: RpcLog) {
   return null;
 }
 
-function updateVaultRegistry(
+export function updateVaultRegistry(
   db: Database,
   decoded: { eventName: string; args: Record<string, unknown> },
   blockNumber: number
 ) {
   const args = decoded.args;
 
-  if ((decoded.eventName === 'SetCap' || decoded.eventName === 'SubmitCap') && typeof args.id === 'string') {
+  if (decoded.eventName === 'SetCap' && typeof args.id === 'string') {
     upsertRegistryFromMarketId(db, args.id.toLowerCase(), 'vault', blockNumber, { cap_assets: bigintString(args.cap) });
+    return;
+  }
+
+  if (decoded.eventName === 'SubmitCap' && typeof args.id === 'string') {
+    // Record the pending market for indexing, but do not expose it as active
+    // until a later SetCap or queue event confirms the vault can use it.
+    upsertRegistryFromMarketId(db, args.id.toLowerCase(), 'vault', blockNumber);
     return;
   }
 
@@ -367,10 +382,14 @@ function updateVaultRegistry(
   }
 }
 
-function indexedMarketIds(db: Database) {
-  const rows = db.query<{ market_id: string }, []>('SELECT market_id FROM market_registry').all();
-  const ids = rows.map((row) => row.market_id as Hex);
-  return ids.length === 0 ? PURINTA_MARKETS.map((market) => market.id as Hex) : ids;
+export function indexedMarketIds(db: Database) {
+  const rows = db
+    .query<{ market_id: string; source: string }, []>('SELECT market_id, source FROM market_registry')
+    .all();
+  const ids = rows
+    .filter((row) => row.source !== 'configured' || ETHEREUM_CONFIGURED_MARKET_IDS.has(row.market_id.toLowerCase()))
+    .map((row) => row.market_id) as Hex[];
+  return ids.length === 0 ? EVENT_INDEXER_MARKETS.map((market) => market.id as Hex) : ids;
 }
 
 function sortLogs(entries: RpcLog[]) {
@@ -387,22 +406,30 @@ async function fetchLogsStrict(db: Database, fromBlock: number, toBlock: number)
     fromBlock: `0x${fromBlock.toString(16)}`,
     toBlock: `0x${toBlock.toString(16)}`,
   };
+  const vaultLogs = await rpc<RpcLog[]>('eth_getLogs', [
+    {
+      address: VAULT_ADDRESS,
+      ...range,
+      topics: [VAULT_EVENT_TOPICS],
+    },
+  ]);
+
+  // Apply vault discovery before querying Morpho over the same range. Otherwise
+  // first Supply/Borrow events for a market added earlier in this batch would
+  // be filtered out and then skipped permanently when the checkpoint advances.
+  for (const entry of sortLogs(vaultLogs)) {
+    const blockNumber = hexToInteger(entry.blockNumber);
+    const decoded = decodeLog(entry);
+    if (blockNumber !== null && decoded) updateVaultRegistry(db, decoded, blockNumber);
+  }
+
   const marketIds = indexedMarketIds(db);
-  const [vaultLogs, marketLogs] = await Promise.all([
-    rpc<RpcLog[]>('eth_getLogs', [
-      {
-        address: VAULT_ADDRESS,
-        ...range,
-        topics: [VAULT_EVENT_TOPICS],
-      },
-    ]),
-    rpc<RpcLog[]>('eth_getLogs', [
-      {
-        address: MORPHO_BLUE,
-        ...range,
-        topics: [MORPHO_EVENT_TOPICS, marketIds],
-      },
-    ]),
+  const marketLogs = await rpc<RpcLog[]>('eth_getLogs', [
+    {
+      address: MORPHO_BLUE,
+      ...range,
+      topics: [MORPHO_EVENT_TOPICS, marketIds],
+    },
   ]);
 
   return sortLogs([...vaultLogs, ...marketLogs]);

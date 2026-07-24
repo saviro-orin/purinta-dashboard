@@ -7,12 +7,12 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 const NavigateContext = createContext<((to: string) => void) | null>(null);
 
 export interface Route {
-  /** Path pattern like `/` or `/market/:id`. Segments starting with `:` become params. */
+  /** Path pattern like `/` or `/market/:chainId/:id`. Segments starting with `:` become params. */
   path: string;
   render: (params: Record<string, string>) => ReactNode;
 }
 
-/** Matches a pattern like `/market/:id` against a pathname, returning its params or null. */
+/** Matches a pattern like `/market/:chainId/:id` against a pathname, returning its params or null. */
 export function matchPath(pattern: string, pathname: string): Record<string, string> | null {
   const patternSegments = pattern.split('/').filter(Boolean);
   const pathSegments = pathname.split('/').filter(Boolean);
